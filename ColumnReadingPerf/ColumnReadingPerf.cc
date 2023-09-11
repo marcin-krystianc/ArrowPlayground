@@ -30,35 +30,77 @@ using arrow::Status;
 namespace
 {
 
+  Status WriteTableToParquet(const std::shared_ptr<arrow::Table> &table, const std::string &filename)
+  {
+    /*
+    // Choose compression
+    std::shared_ptr<parquet::WriterProperties> props = parquet::WriterProperties::Builder().compression(arrow::Compression::SNAPPY)->build();
+
+    // Opt to store Arrow schema for easier reads back into Arrow
+    std::shared_ptr<parquet::ArrowWriterProperties> arrow_props = parquet::ArrowWriterProperties::Builder().store_schema()->build();
+
+    std::shared_ptr<arrow::io::FileOutputStream> outfile;
+    PARQUET_THROW_NOT_OK(arrow::io::FileOutputStream::Open(filename, &outfile));
+
+    ARROW_RETURN_NOT_OK(parquet::arrow::WriteTable(*table,
+                                                   arrow::default_memory_pool(), outfile,
+                                                   3, props, arrow_props));
+    return Status::OK();
+*/
+
+        std::shared_ptr<arrow::io::FileOutputStream> outfile;
+        PARQUET_THROW_NOT_OK(arrow::io::FileOutputStream::Open(filename, &outfile));
+        PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table.get(), arrow::default_memory_pool(), outfile, 1024));
+        return Status::OK();
+
+  }
+
   Status RunMain(int argc, char **argv)
   {
-
+    auto nRows = 1;
     std::list<int> nColumns = {100, 200, 300, 500, 1000, 10000};
+
     for (int n : nColumns)
     {
-      auto builder = arrow::Int32Builder();
+      std::cerr << "* n1:" << n << std::endl;
+      std::vector<std::shared_ptr<arrow::Array>> arrays;
+      std::vector<std::shared_ptr<arrow::Field>> fields;
+      arrow::Int32Builder builder = arrow::Int32Builder();
 
+      // For simplicity, we'll create int32 columns. You can expand this to handle other types.
       for (int i = 0; i < n; i++)
       {
-        builder.Append(1);
+        arrow::Int32Builder builder;
+        for (auto j = 0; j < nRows; j++)
+        {
+          ARROW_RETURN_NOT_OK(builder.Append(j));
+        }
+
+        std::shared_ptr<arrow::Array> array;
+        ARROW_RETURN_NOT_OK(builder.Finish(&array));
+
+        arrays.push_back(array);
+        fields.push_back(arrow::field("int_column_" + std::to_string(i), arrow::int32()));
       }
 
-      auto array = builder.Finish();
+      auto table = arrow::Table::Make(arrow::schema(fields), arrays);
 
-      std::cerr << "* n:" << n << std::endl;
+      ARROW_RETURN_NOT_OK(WriteTableToParquet(table, "my.parquet"));
 
-      return Status::OK();
+      std::cerr << "* n4:" << n << std::endl;
     }
 
-  } // namespace
-
-  int main(int argc, char **argv)
-  {
-    Status st = RunMain(argc, argv);
-    if (!st.ok())
-    {
-      std::cerr << st << std::endl;
-      return 1;
-    }
-    return 0;
+    return Status::OK();
   }
+} // namespace
+
+int main(int argc, char **argv)
+{
+  Status st = RunMain(argc, argv);
+  if (!st.ok())
+  {
+    std::cerr << st << std::endl;
+    return 1;
+  }
+  return 0;
+}
