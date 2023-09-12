@@ -15,17 +15,6 @@ namespace
 {
   const char *FILE_NAME = "my.parquet";
 
-  Status WriteTableToParquet(const std::shared_ptr<arrow::Table> &table, const std::string &filename, std::chrono::microseconds *dt)
-  {
-    auto begin = std::chrono::steady_clock::now();
-    auto result = arrow::io::FileOutputStream::Open(filename);
-    auto outfile = result.ValueOrDie();
-    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, 100000));
-    auto end = std::chrono::steady_clock::now();
-    *dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
-    return Status::OK();
-  }
-
   std::shared_ptr<arrow::Table> GetTable(size_t n)
   {
     auto nRows = 10000;
@@ -53,6 +42,18 @@ namespace
 
     auto table = arrow::Table::Make(arrow::schema(fields), arrays);
     return table;
+  }
+
+  Status WriteTableToParquet(int n, const std::string &filename, std::chrono::microseconds *dt)
+  {    
+    auto table = GetTable(n);
+    auto begin = std::chrono::steady_clock::now();
+    auto result = arrow::io::FileOutputStream::Open(filename);
+    auto outfile = result.ValueOrDie();
+    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, 100000));
+    auto end = std::chrono::steady_clock::now();
+    *dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    return Status::OK();
   }
 
   Status ReadEntireTable(const std::string &filename, std::chrono::microseconds *dt)
@@ -97,9 +98,8 @@ namespace
 
     for (int n : nColumns)
     {
-      auto table = GetTable(n);
       std::chrono::microseconds writing_dt;
-      ARROW_RETURN_NOT_OK(WriteTableToParquet(table, FILE_NAME, &writing_dt));
+      ARROW_RETURN_NOT_OK(WriteTableToParquet(n, FILE_NAME, &writing_dt));
 
       std::chrono::microseconds reading_all_dt;
       ARROW_RETURN_NOT_OK(ReadEntireTable(FILE_NAME, &reading_all_dt));
