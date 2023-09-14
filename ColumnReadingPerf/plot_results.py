@@ -5,7 +5,8 @@ import sys
 plt.rcParams["figure.figsize"] = [7.50, 3.50]
 plt.rcParams["figure.autolayout"] = True
 
-df = pd.read_csv(sys.argv[1], skipinitialspace=True)
+path = sys.argv[1]
+df = pd.read_csv(path, skipinitialspace=True)
 print (df)
 
 groups =  df.groupby(['chunk_size', 'rows'])
@@ -25,5 +26,6 @@ for ((chunk_size, rows), g) in groups:
 
     i+=1
 
+fig.suptitle(path)
 plt.legend()
 plt.show()
