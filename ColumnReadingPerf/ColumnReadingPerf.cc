@@ -8,27 +8,33 @@
 #include <iostream>
 #include <list>
 #include <chrono>
+#include <random>
+#include <vector>
+#include <fstream>
+#include <iomanip>
 
 using arrow::Status;
 
 namespace
 {
-  const char *FILE_NAME = "my.parquet";
+  const char *FILE_NAME = "/root/my.parquet";
 
-  std::shared_ptr<arrow::Table> GetTable(size_t n)
+  std::shared_ptr<arrow::Table> GetTable(size_t nColumns, size_t nRows)
   {
-    auto nRows = 10000;
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_real_distribution<> rand_gen(0.0, 1.0);
+
     std::vector<std::shared_ptr<arrow::Array>> arrays;
     std::vector<std::shared_ptr<arrow::Field>> fields;
-    arrow::Int32Builder builder = arrow::Int32Builder();
 
     // For simplicity, we'll create int32 columns. You can expand this to handle other types.
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nColumns; i++)
     {
-      arrow::Int32Builder builder;
+      arrow::DoubleBuilder builder;
       for (auto j = 0; j < nRows; j++)
       {
-        if (!builder.Append(j).ok())
+        if (!builder.Append(rand_gen(rng)).ok())
           throw std::runtime_error("builder.Append");
       }
 
@@ -37,20 +43,20 @@ namespace
         throw std::runtime_error("builder.Finish");
 
       arrays.push_back(array);
-      fields.push_back(arrow::field("int_column_" + std::to_string(i), arrow::int32()));
+      fields.push_back(arrow::field("c_" + std::to_string(i), arrow::float64()));
     }
 
     auto table = arrow::Table::Make(arrow::schema(fields), arrays);
     return table;
   }
 
-  Status WriteTableToParquet(int n, const std::string &filename, std::chrono::microseconds *dt)
-  {    
-    auto table = GetTable(n);
+  Status WriteTableToParquet(size_t nColumns, size_t nRows, const std::string &filename, std::chrono::microseconds *dt, int64_t chunkSize)
+  {
+    auto table = GetTable(nColumns, nRows);
     auto begin = std::chrono::steady_clock::now();
     auto result = arrow::io::FileOutputStream::Open(filename);
     auto outfile = result.ValueOrDie();
-    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, 100000));
+    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, chunkSize));
     auto end = std::chrono::steady_clock::now();
     *dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
     return Status::OK();
@@ -92,26 +98,56 @@ namespace
 
   Status RunMain(int argc, char **argv)
   {
-    std::list<int> nColumns = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000};
+    std::ofstream csvFile;
+    csvFile.open("results_cpp.csv", std::ios_base::out); // append instead of overwrite
+    csvFile << "columns, rows, chunk_size, writing(μs), reading_all(μs), reading_100(μs)" << std::endl;
+
+    std::list<int> nColumns = {
+        100, 200, 300, 400, 500, 600, 700, 800, 900,
+        1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+        10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000};
+
+    std::list<int> chunk_sizes = {1000, 1000000, 1000000000};
+    std::list<int> rows_list = {100, 5000};
+
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);
 
-    for (int n : nColumns)
-    {
-      std::chrono::microseconds writing_dt;
-      ARROW_RETURN_NOT_OK(WriteTableToParquet(n, FILE_NAME, &writing_dt));
+    for (auto chunk_size : chunk_sizes) {
+      for (int nRow : rows_list) {
+        for (int nColumn : nColumns) 
+        {
+          std::chrono::microseconds writing_dt;
+          ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
 
-      std::chrono::microseconds reading_all_dt;
-      ARROW_RETURN_NOT_OK(ReadEntireTable(FILE_NAME, &reading_all_dt));
+          const int repeats = 3;
+          std::vector<std::chrono::microseconds> reading_all_dts(repeats);
+          std::vector<std::chrono::microseconds> reading_100_dts(repeats);
+          for (int i = 0; i < repeats; i++)
+          {
+            ARROW_RETURN_NOT_OK(ReadEntireTable(FILE_NAME, &reading_all_dts[i]));
+            ARROW_RETURN_NOT_OK(ReadColumnsAsTable(FILE_NAME, indicies, &reading_100_dts[i]));
+          }
 
-      std::chrono::microseconds reading_100_dt;
-      ARROW_RETURN_NOT_OK(ReadColumnsAsTable(FILE_NAME, indicies, &reading_100_dt));
+          auto reading_all_dt = *std::min_element(reading_all_dts.begin(), reading_all_dts.end());
+          auto reading_100_dt = *std::min_element(reading_100_dts.begin(), reading_100_dts.end());
 
-      std::cerr << "n=" << n
-                << " ,writing_dt=" << writing_dt.count() / n
-                << " ,reading_all_dt=" << reading_all_dt.count() / n
-                << " ,reading_100_dt=" << reading_100_dt.count() / 100
-                << std::endl;
+          std::cerr << "(" << nColumn << ", " << nRow << ")"
+                    << ", chunk_size=" << chunk_size
+                    << ", writing_dt=" << writing_dt.count() / nColumn
+                    << ", reading_all_dt=" << reading_all_dt.count() / nColumn
+                    << ", reading_100_dt=" << reading_100_dt.count() / 1000
+                    << std::endl;
+
+          csvFile << nColumn << ","
+                  << nRow << ","
+                  << chunk_size << ","
+                  << writing_dt.count() << ","
+                  << reading_all_dt.count() << ","
+                  << reading_100_dt.count()
+                  << std::endl;
+        }
+      }
     }
 
     return Status::OK();

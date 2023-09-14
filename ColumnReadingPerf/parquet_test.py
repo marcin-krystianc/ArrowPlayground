@@ -1,9 +1,10 @@
 import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
-import matplotlib.pyplot as plt
 import time
 import polars as pl
+import csv
+import gc
 
 t_read = []
 t_write = []
@@ -13,30 +14,55 @@ t_read_100_pre_buffer = []
 ds = []
 path = "/tmp/test_wide.parquet"
 
-df = pl.DataFrame(
-    data=np.random.randn(20_000, 10_000),
-    schema=[f"c{i}" for i in range(10_000)]
-)
+columns_list = [100, 200, 300, 400, 500, 600, 700, 800, 900,              
+                1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+                10_000, 20_000, 30_000, 40_000, 50_000, 
+                #60_000, 70_000, 80_000, 90_000,
+                ]
 
-for d in [100, 200, 300, 500, 1000, 2000, 10_000]:
-    table = df.select([f"c{i}" for i in range(d)]).to_arrow()
-    t = time.time()
-    pq.write_table(table, path, row_group_size=100_000)
-    t_write.append((time.time() - t)/d)
+chunks_list = [1000, 1000000, 1000000000]
+rows_lsit = [100, 5000]
+with open('results_python.csv', 'w', encoding='UTF8', newline='') as f:
 
-    t = time.time()
-    res = pq.read_table(path)
-    t_read.append((time.time() - t)/d)
+    writer = csv.writer(f)
+     # write the header
+    writer.writerow(['columns','rows','chunk_size','writing(μs)','reading_all(μs)','reading_100(μs)'])
 
-    print(res.shape)
+    for chunk_size in chunks_list:
+        for rows in rows_lsit:
+            
+            
+            for columns in columns_list:
+                #table =  table = df.select([f"c{i}" for i in range(columns)]).to_arrow()
+                
+                table = pl.DataFrame(
+                    data=np.random.randn(rows, columns),
+                    schema=[f"c{i}" for i in range(columns)]).to_arrow()
 
-    t = time.time()
-    res = pq.read_table(path, columns=[f"c{i}" for i in range(100)])
-    t_read_100.append((time.time() - t)/100)
-    ds.append(d)
+                t = time.time()
+                pq.write_table(table, path, row_group_size=chunk_size)
+                t_writing = time.time() - t;
+                t_write.append(t_writing)
 
-plt.plot(ds, t_read_100, label='read 100 columns')
-plt.plot(ds, t_read, label='read all columns')
-plt.plot(ds, t_write, label='write')
-plt.legend()
-plt.show()
+                del table
+                gc.collect()
+
+                t = time.time()
+                res = pq.read_table(path)
+                t_reading = time.time() - t;
+                t_read.append(t_reading)
+        
+                del res 
+                gc.collect()
+
+                t = time.time()                    
+                res_100 = pq.read_table(path, columns=[f"c{i}" for i in range(100)])
+                t_reading_100 = time.time() - t;
+                t_read_100.append(t_reading_100)    
+        
+                del res_100
+                gc.collect()
+
+                data = [columns, rows ,chunk_size , t_writing * 1_000_000, t_reading * 1_000_000, t_reading_100 * 1_000_000]
+                writer.writerow(data)
+                print(str(data))
