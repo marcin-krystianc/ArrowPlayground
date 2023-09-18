@@ -56,7 +56,9 @@ namespace
     auto begin = std::chrono::steady_clock::now();
     auto result = arrow::io::FileOutputStream::Open(filename);
     auto outfile = result.ValueOrDie();
-    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, chunkSize));
+    parquet::WriterProperties::Builder builder;
+    auto properties = builder.max_row_group_length(chunkSize)->build();
+    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, chunkSize, properties));
     auto end = std::chrono::steady_clock::now();
     *dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
     return Status::OK();
@@ -105,12 +107,15 @@ namespace
     std::list<int> nColumns = {
         100, 200, 300, 400, 500, 600, 700, 800, 900,
         1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-        10000, 20000, 30000, 40000, 50000
-        // , 60000, 70000, 80000, 90000
+        10000, 20000, 30000, 40000, 60000, 70000, 80000, 90000
         };
 
-    std::list<int> chunk_sizes = {1000, 1000000, 1000000000};
-    std::list<int> rows_list = {100, 5000};
+    std::list<int64_t> chunk_sizes = {
+      //1024, 1024 * 1024,
+     1024 * 1024 * 1024};
+    std::list<int> rows_list = {
+      //100, 
+    5000};
 
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);
@@ -138,7 +143,7 @@ namespace
                     << ", chunk_size=" << chunk_size
                     << ", writing_dt=" << writing_dt.count() / nColumn
                     << ", reading_all_dt=" << reading_all_dt.count() / nColumn
-                    << ", reading_100_dt=" << reading_100_dt.count() / 1000
+                    << ", reading_100_dt=" << reading_100_dt.count() / 100
                     << std::endl;
 
           csvFile << nColumn << ","
