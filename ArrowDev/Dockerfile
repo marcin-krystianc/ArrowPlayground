@@ -30,11 +30,6 @@ RUN apt-get update && \
 	#Clean apt cache
 	&& rm -rf /var/lib/apt/lists/* \	
 	&& echo
-	
-RUN  echo 'root:password' | chpasswd
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
-RUN service ssh start
-EXPOSE 22
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
