@@ -24,20 +24,28 @@ RUN apt-get update && \
 	binutils \
 	linux-tools-generic \
 	valgrind \
-
+    python3-dev \
+    python3-dbg \
+	
 	#Clean apt cache
 	&& rm -rf /var/lib/apt/lists/* \	
 	&& echo
+	
+RUN  echo 'root:password' | chpasswd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
+RUN service ssh start
+EXPOSE 22
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
 RUN git clone https://github.com/apache/arrow.git && \
     cd arrow 
+
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
 RUN mkdir build && cd build && \
     cmake .. \
-    -DARROW_PARQUET=ON \
+	-DARROW_PARQUET=ON \
     -DPARQUET_REQUIRE_ENCRYPTION=ON \
     -DARROW_DATASET=ON \
     -DARROW_ACERO=ON \
@@ -92,20 +100,27 @@ RUN mkdir build && cd build && \
     -DARROW_WITH_ZLIB=ON \
     -DARROW_WITH_ZSTD=ON \
     -DARROW_ZSTD_USE_SHARED=ON \
+    -DCMAKE_BUILD_TYPE="Debug" \
     -GNinja && \
     ninja install
+
 # Cleanup Arrow C++ build directory
 RUN rm -rf /src/arrow/cpp/build
+
 # Build Arrow Python
 WORKDIR /src/arrow/python
 RUN python setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet && \
     python setup.py install
+
 # Cleanup Arrow Python build artifacts
 RUN rm -rf /src/arrow/python/build
+
 # Cleanup apt cache to further reduce image size
+
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 RUN pip3 install jupyterlab
+
 # Command to keep the container running
 CMD ["bash"]

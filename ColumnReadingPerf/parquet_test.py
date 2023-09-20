@@ -14,14 +14,16 @@ t_read_100_pre_buffer = []
 ds = []
 path = "/tmp/test_wide.parquet"
 
-columns_list = [100, 200, 300, 400, 500, 600, 700, 800, 900,              
-                1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-                10_000, 20_000, 30_000, 40_000, 50_000, 
+columns_list = [
+    #100, 200, 300, 400, 500, 600, 700, 800, 900,              
+                #1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+                #10_000, 20_000, 30_000, 40_000, 
+                50_000, 
                 #60_000, 70_000, 80_000, 90_000,
                 ]
 
 chunks_list = [1000, 1000000, 1000000000]
-rows_lsit = [100, 5000]
+rows_lsit = [5000]
 with open('results_python.csv', 'w', encoding='UTF8', newline='') as f:
 
     writer = csv.writer(f)
@@ -47,19 +49,20 @@ with open('results_python.csv', 'w', encoding='UTF8', newline='') as f:
                 del table
                 gc.collect()
 
-                t = time.time()
-                res = pq.read_table(path)
-                t_reading = time.time() - t;
-                t_read.append(t_reading)
-        
-                del res 
-                gc.collect()
+                # t = time.time()
+                # res = pq.read_table(path)
+                # t_reading = time.time() - t;
+                # t_read.append(t_reading)
+    
+                # del res 
+                # gc.collect()
 
-                t = time.time()                    
-                res_100 = pq.read_table(path, columns=[f"c{i}" for i in range(100)])
-                t_reading_100 = time.time() - t;
-                t_read_100.append(t_reading_100)    
-        
+                for i in range(0, 8000):
+                    t = time.time()                    
+                    res_100 = pq.read_table(path, columns=[f"c{i}" for i in range(100)])
+                    t_reading_100 = time.time() - t;
+                    t_read_100.append(t_reading_100)    
+            
                 del res_100
                 gc.collect()
 

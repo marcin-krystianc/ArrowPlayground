@@ -20,9 +20,9 @@ namespace ColumnReadingPerfNet
                 var path = @"d:\tmp\my_net.parquet";
                 
                 var columnsList = new[]{
-                    100, 200, 300, 400, 500, 600, 700, 800, 900,
-                    1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-                    10000, 20000, 30000, 40000, 
+                    //100, 200, 300, 400, 500, 600, 700, 800, 900,
+                    //1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+                    //10000, 20000, 30000, 40000, 
                     50000
                 };
 
@@ -58,8 +58,6 @@ namespace ColumnReadingPerfNet
                 {
                     using(ParquetWriter writer = await ParquetWriter.CreateAsync(schema, fs))
                     {
-                        writer.CompressionMethod = CompressionMethod.Gzip;
-                        
                         using(ParquetRowGroupWriter groupWriter = writer.CreateRowGroup())
                         {
                             Console.WriteLine("data");
