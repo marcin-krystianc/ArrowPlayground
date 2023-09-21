@@ -17,7 +17,7 @@ using arrow::Status;
 
 namespace
 {
-  const char *FILE_NAME = "/root/my.parquet";
+  const char *FILE_NAME = "/tmp/my_cpp.parquet";
 
   std::shared_ptr<arrow::Table> GetTable(size_t nColumns, size_t nRows)
   {
@@ -81,7 +81,7 @@ namespace
     return Status::OK();
   }
 
-  Status ReadColumnsAsTable(const std::string &filename, std::vector<int> indicies, std::chrono::microseconds *dt)
+  Status ReadColumnsAsTable(const std::string &filename, std::vector<int> indicies, std::chrono::microseconds *dt, std::chrono::microseconds *dt1, std::chrono::microseconds *dt2)
   {
     auto begin = std::chrono::steady_clock::now();
 
@@ -89,12 +89,17 @@ namespace
     ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
     std::unique_ptr<parquet::arrow::FileReader> reader;
     ARROW_RETURN_NOT_OK(parquet::arrow::OpenFile(infile, arrow::default_memory_pool(), &reader));
+    auto end = std::chrono::steady_clock::now();
+    *dt1 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+
+    begin = std::chrono::steady_clock::now();
     std::shared_ptr<arrow::Table> parquet_table;
     // Read the table.
     PARQUET_THROW_NOT_OK(reader->ReadTable(indicies, &parquet_table));
 
-    auto end = std::chrono::steady_clock::now();
-    *dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    end = std::chrono::steady_clock::now();
+    *dt2 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    *dt = *dt1 + *dt2;
     return Status::OK();
   }
 
@@ -107,22 +112,19 @@ namespace
     std::list<int> nColumns = {
         100, 200, 300, 400, 500, 600, 700, 800, 900,
         1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-        10000, 20000, 30000, 40000, 60000, 70000, 80000, 90000
-        };
+        10000, 20000, 30000, 40000, 50000};
 
-    std::list<int64_t> chunk_sizes = {
-      //1024, 1024 * 1024,
-     1024 * 1024 * 1024};
-    std::list<int> rows_list = {
-      //100, 
-    5000};
+    std::list<int64_t> chunk_sizes = {1000, 10000};
+    std::list<int> rows_list = {100, 5000};
 
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);
 
-    for (auto chunk_size : chunk_sizes) {
-      for (int nRow : rows_list) {
-        for (int nColumn : nColumns) 
+    for (auto chunk_size : chunk_sizes)
+    {
+      for (int nRow : rows_list)
+      {
+        for (int nColumn : nColumns)
         {
           std::chrono::microseconds writing_dt;
           ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
@@ -130,20 +132,26 @@ namespace
           const int repeats = 3;
           std::vector<std::chrono::microseconds> reading_all_dts(repeats);
           std::vector<std::chrono::microseconds> reading_100_dts(repeats);
+          std::vector<std::chrono::microseconds> reading_100_dts1(repeats);
+          std::vector<std::chrono::microseconds> reading_100_dts2(repeats);
           for (int i = 0; i < repeats; i++)
           {
             ARROW_RETURN_NOT_OK(ReadEntireTable(FILE_NAME, &reading_all_dts[i]));
-            ARROW_RETURN_NOT_OK(ReadColumnsAsTable(FILE_NAME, indicies, &reading_100_dts[i]));
+            ARROW_RETURN_NOT_OK(ReadColumnsAsTable(FILE_NAME, indicies, &reading_100_dts[i], &reading_100_dts1[i], &reading_100_dts2[i]));
           }
 
           auto reading_all_dt = *std::min_element(reading_all_dts.begin(), reading_all_dts.end());
           auto reading_100_dt = *std::min_element(reading_100_dts.begin(), reading_100_dts.end());
+          auto reading_100_dt1 = *std::min_element(reading_100_dts1.begin(), reading_100_dts1.end());
+          auto reading_100_dt2 = *std::min_element(reading_100_dts2.begin(), reading_100_dts2.end());
 
           std::cerr << "(" << nColumn << ", " << nRow << ")"
                     << ", chunk_size=" << chunk_size
                     << ", writing_dt=" << writing_dt.count() / nColumn
                     << ", reading_all_dt=" << reading_all_dt.count() / nColumn
                     << ", reading_100_dt=" << reading_100_dt.count() / 100
+                    << ", reading_100_dt1=" << reading_100_dt1.count() / 100
+                    << ", reading_100_dt2=" << reading_100_dt2.count() / 100
                     << std::endl;
 
           csvFile << nColumn << ","
@@ -159,6 +167,57 @@ namespace
 
     return Status::OK();
   }
+} // namespace
+
+Status RunMain2(int argc, char **argv)
+{
+  std::list<int> nColumns = {
+      // 100, 200, 300, 400, 500, 600, 700, 800, 900,
+      // 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+      20000};
+  std::list<int64_t> chunk_sizes = {1024 * 1024 * 1024};
+  std::list<int> rows_list = {5000};
+  std::vector<int> indicies(100);
+  std::iota(indicies.begin(), indicies.end(), 0);
+
+  for (auto chunk_size : chunk_sizes)
+  {
+    for (int nRow : rows_list)
+    {
+      for (int nColumn : nColumns)
+      {
+        std::cerr << "Writing table" << std::endl;
+
+        // std::chrono::microseconds writing_dt;
+        // ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
+
+        std::cerr << "Reading columns" << std::endl;
+        const int repeats = 3;
+        std::vector<std::chrono::microseconds> reading_100_dts(repeats);
+        std::vector<std::chrono::microseconds> reading_100_dts1(repeats);
+        std::vector<std::chrono::microseconds> reading_100_dts2(repeats);
+        for (int i = 0; i < repeats; i++)
+        {
+          ARROW_RETURN_NOT_OK(ReadColumnsAsTable(FILE_NAME, indicies, &reading_100_dts[i], &reading_100_dts1[i], &reading_100_dts2[i]));
+        }
+
+        auto reading_100_dt = *std::min_element(reading_100_dts.begin(), reading_100_dts.end());
+        auto reading_100_dt1 = *std::min_element(reading_100_dts1.begin(), reading_100_dts1.end());
+        auto reading_100_dt2 = *std::min_element(reading_100_dts2.begin(), reading_100_dts2.end());
+
+        std::cerr << "(" << nColumn << ", " << nRow << ")"
+                  << ", chunk_size=" << chunk_size
+                  //<< ", writing_dt=" << writing_dt.count() / nColumn
+                  //<< ", reading_all_dt=" << reading_all_dt.count() / nColumn
+                  << ", reading_100_dt=" << reading_100_dt.count() / 100
+                  << ", reading_100_dt1=" << reading_100_dt1.count() / 100
+                  << ", reading_100_dt2=" << reading_100_dt2.count() / 100
+                  << std::endl;
+      }
+    }
+  }
+
+  return Status::OK();
 } // namespace
 
 int main(int argc, char **argv)
