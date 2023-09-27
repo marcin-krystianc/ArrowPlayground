@@ -24,9 +24,6 @@ RUN apt-get update && \
 	binutils \
 	linux-tools-generic \
 	valgrind \
-    python3-dev \
-    python3-dbg \
-	
 	#Clean apt cache
 	&& rm -rf /var/lib/apt/lists/* \	
 	&& echo
@@ -95,7 +92,6 @@ RUN mkdir build && cd build && \
     -DARROW_WITH_ZLIB=ON \
     -DARROW_WITH_ZSTD=ON \
     -DARROW_ZSTD_USE_SHARED=ON \
-    -DCMAKE_BUILD_TYPE="Debug" \
     -GNinja && \
     ninja install
 

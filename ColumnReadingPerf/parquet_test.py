@@ -37,7 +37,7 @@ with open('results_python.csv', 'w', encoding='UTF8', newline='') as f:
                     schema=[f"c{i}" for i in range(columns)]).to_arrow()
 
                 t = time.time()
-                pq.write_table(table, path, row_group_size=chunk_size)
+                pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False)
                 t_writing = time.time() - t;
                 t_write.append(t_writing)
 

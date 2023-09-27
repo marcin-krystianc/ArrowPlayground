@@ -43,7 +43,7 @@ namespace
         throw std::runtime_error("builder.Finish");
 
       arrays.push_back(array);
-      fields.push_back(arrow::field("c_" + std::to_string(i), arrow::float64()));
+      fields.push_back(arrow::field("c_" + std::to_string(i), arrow::float64(), false));
     }
 
     auto table = arrow::Table::Make(arrow::schema(fields), arrays);
@@ -57,7 +57,10 @@ namespace
     auto result = arrow::io::FileOutputStream::Open(filename);
     auto outfile = result.ValueOrDie();
     parquet::WriterProperties::Builder builder;
-    auto properties = builder.max_row_group_length(chunkSize)->build();
+    auto properties = builder
+    .max_row_group_length(chunkSize)
+    ->disable_dictionary()
+    ->build();
     PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, chunkSize, properties));
     auto end = std::chrono::steady_clock::now();
     *dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
@@ -112,10 +115,13 @@ namespace
     std::list<int> nColumns = {
         100, 200, 300, 400, 500, 600, 700, 800, 900,
         1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-        10000, 20000, 30000, 40000, 50000};
+        10000, 20000, 30000, 40000, 
+        50000};
 
     std::list<int64_t> chunk_sizes = {1000, 10000};
+    //std::list<int64_t> chunk_sizes = {10000};
     std::list<int> rows_list = {100, 5000};
+    //std::list<int> rows_list = {5000};
 
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);
