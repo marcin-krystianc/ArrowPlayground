@@ -111,7 +111,7 @@ RUN rm -rf /src/arrow/python/build
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-RUN pip3 install jupyterlab
+RUN pip3 install jupyterlab polars
 
 # Command to keep the container running
 CMD ["bash"]

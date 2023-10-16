@@ -95,6 +95,8 @@ namespace
     auto end = std::chrono::steady_clock::now();
     *dt1 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
 
+    reader->set_use_threads(false);
+
     begin = std::chrono::steady_clock::now();
     std::shared_ptr<arrow::Table> parquet_table;
     // Read the table.
@@ -110,18 +112,18 @@ namespace
   {
     std::ofstream csvFile;
     csvFile.open("results_cpp.csv", std::ios_base::out); // append instead of overwrite
-    csvFile << "columns, rows, chunk_size, writing(μs), reading_all(μs), reading_100(μs)" << std::endl;
+    csvFile << "columns,rows,chunk_size,writing(μs),reading_all(μs),reading_100(μs),reading_p1_100(μs),reading_p2_100(μs)" << std::endl;
 
     std::list<int> nColumns = {
         100, 200, 300, 400, 500, 600, 700, 800, 900,
         1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-        10000, 20000, 30000, 40000, 
-        50000};
+        10000, 12000, 14000, 16000, 18000, 20000
+        };
 
-    std::list<int64_t> chunk_sizes = {1000, 10000};
-    //std::list<int64_t> chunk_sizes = {10000};
-    std::list<int> rows_list = {100, 5000};
-    //std::list<int> rows_list = {5000};
+    std::list<int64_t> chunk_sizes = {
+    1000, 
+    10000};
+    std::list<int> rows_list = {10000};
 
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);
@@ -142,7 +144,7 @@ namespace
           std::vector<std::chrono::microseconds> reading_100_dts2(repeats);
           for (int i = 0; i < repeats; i++)
           {
-            ARROW_RETURN_NOT_OK(ReadEntireTable(FILE_NAME, &reading_all_dts[i]));
+            // ARROW_RETURN_NOT_OK(ReadEntireTable(FILE_NAME, &reading_all_dts[i]));
             ARROW_RETURN_NOT_OK(ReadColumnsAsTable(FILE_NAME, indicies, &reading_100_dts[i], &reading_100_dts1[i], &reading_100_dts2[i]));
           }
 
@@ -165,7 +167,9 @@ namespace
                   << chunk_size << ","
                   << writing_dt.count() << ","
                   << reading_all_dt.count() << ","
-                  << reading_100_dt.count()
+                  << reading_100_dt.count() << ","
+                  << reading_100_dt1.count() << ","
+                  << reading_100_dt2.count()
                   << std::endl;
         }
       }
@@ -180,7 +184,7 @@ Status RunMain2(int argc, char **argv)
   std::list<int> nColumns = {
       // 100, 200, 300, 400, 500, 600, 700, 800, 900,
       // 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-      20000};
+      100};
   std::list<int64_t> chunk_sizes = {1024 * 1024 * 1024};
   std::list<int> rows_list = {5000};
   std::vector<int> indicies(100);
@@ -194,8 +198,8 @@ Status RunMain2(int argc, char **argv)
       {
         std::cerr << "Writing table" << std::endl;
 
-        // std::chrono::microseconds writing_dt;
-        // ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
+        std::chrono::microseconds writing_dt;
+        ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
 
         std::cerr << "Reading columns" << std::endl;
         const int repeats = 3;
@@ -219,6 +223,7 @@ Status RunMain2(int argc, char **argv)
                   << ", reading_100_dt1=" << reading_100_dt1.count() / 100
                   << ", reading_100_dt2=" << reading_100_dt2.count() / 100
                   << std::endl;
+                  
       }
     }
   }

@@ -18,11 +18,15 @@ for ((chunk_size, rows), g) in groups:
     g['writing(μs)'] = g['writing(μs)'] / g['columns']
     g['reading_all(μs)'] = g['reading_all(μs)'] / g['columns']
     g['reading_100(μs)'] = g['reading_100(μs)'] / 100
+    g['reading_p1_100(μs)'] = g['reading_p1_100(μs)'] / 100
+    g['reading_p2_100(μs)'] = g['reading_p2_100(μs)'] / 100
 
     ax[i].set_title(title)
     # ax[i].plot(g['columns'], g['writing(μs)'], label='writing(μs) (per column)', marker='o',)
-    ax[i].plot(g['columns'], g['reading_all(μs)'], label='reading_all(μs) (per column)', marker='o',)
-    ax[i].plot(g['columns'], g['reading_100(μs)'], label='reading_100(μs) (per column)', marker='o',)
+    # ax[i].plot(g['columns'], g['reading_all(μs)'], label='reading_all(μs) (per column)', marker='o',)
+    # ax[i].plot(g['columns'], g['reading_100(μs)'], label='reading_100(μs) (per column)', marker='o',)
+    # ax[i].plot(g['columns'], g['reading_p1_100(μs)'], label='reading_p1_100(μs) (per column)', marker='o',)
+    ax[i].plot(g['columns'], g['reading_p2_100(μs)'], label='reading_p2_100(μs) (per column)', marker='o',)
 
     i+=1
 

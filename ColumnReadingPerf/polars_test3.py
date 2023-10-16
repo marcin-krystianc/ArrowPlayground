@@ -18,12 +18,13 @@ path = "/tmp/test_wide.parquet"
 columns_list = [
                 100, 200, 300, 400, 500, 600, 700, 800, 900,              
                 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-                10_000, 20_000, 30_000, 40_000, 50_000, 
+                10_000, 20_000, 30_000, 40_000,
+                50_000, 
                 ]
 
 chunks_list = [1000, 10_000]
 rows_lsit = [5000]
-with open('results_python.csv', 'w', encoding='UTF8', newline='') as f:
+with open('results_polars.csv', 'w', encoding='UTF8', newline='') as f:
 
     writer = csv.writer(f)
      # write the header
@@ -50,18 +51,21 @@ with open('results_python.csv', 'w', encoding='UTF8', newline='') as f:
                 t_read = []
                 t_read_100 = []
 
+                print("read_table")
+
                 for i in range(0, 3):
 
                     t = time.time()
-                    res = pq.read_table(path, use_threads=False)
+                    res = pl.read_parquet(path, parallel="none")
                     t_read.append(time.time() - t)
         
                     del res 
-                    gc.collect()
-                    
-                    t = time.time()         
-                    # print("read_table")     
-                    res_100 = pq.read_table(path, columns=[f"c{i}" for i in range(100)], use_threads=False)
+                    gc.collect()                    
+                  
+                    t = time.time()
+                    res_100 = pl.read_parquet(path, columns=[i for i in range(100)], parallel="none")
+
+                    # res_100 = pq.read_table(path, columns=[f"c{i}" for i in range(100)], use_threads=False)
                     t_read_100.append(time.time() - t)    
                 
                     del res_100
