@@ -98,6 +98,9 @@ RUN mkdir build && cd build && \
 # Cleanup Arrow C++ build directory
 RUN rm -rf /src/arrow/cpp/build
 
+# Remove any previous version of Arrow Python package
+RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
+
 # Build Arrow Python
 WORKDIR /src/arrow/python
 RUN python setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet && \
@@ -111,7 +114,13 @@ RUN rm -rf /src/arrow/python/build
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-RUN pip3 install jupyterlab polars
+RUN pip3 install jupyterlab polars parquet-tools build
+
+WORKDIR /src
+RUN git clone https://github.com/adamreeve/parquet-inspect.git && \
+    cd parquet-inspect && \
+	python -m build  && \
+	pip install --editable .
 
 # Command to keep the container running
 CMD ["bash"]
