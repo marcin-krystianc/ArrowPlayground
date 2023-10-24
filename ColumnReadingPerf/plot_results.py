@@ -9,26 +9,39 @@ path = sys.argv[1]
 df = pd.read_csv(path, skipinitialspace=True)
 print (df)
 
-groups =  df.groupby(['chunk_size', 'rows'])
-fig, ax = plt.subplots(len(groups), sharex=True)
-i = 0
-for ((chunk_size, rows), g) in groups:
-    title = "chunk_size={}, rows={}".format(chunk_size, rows)
-    print(title)
-    g['writing(μs)'] = g['writing(μs)'] / g['columns']
-    g['reading_all(μs)'] = g['reading_all(μs)'] / g['columns']
-    g['reading_100(μs)'] = g['reading_100(μs)'] / 100
-    g['reading_p1_100(μs)'] = g['reading_p1_100(μs)'] / 100
-    g['reading_p2_100(μs)'] = g['reading_p2_100(μs)'] / 100
+df['reading(μs)'] =    df['reading(μs)'] /    df['columns_to_read']
+df['reading_p1(μs)'] = df['reading_p1(μs)'] / df['columns_to_read']
+df['reading_p2(μs)'] = df['reading_p2(μs)'] / df['columns_to_read']
 
-    ax[i].set_title(title)
-    # ax[i].plot(g['columns'], g['writing(μs)'], label='writing(μs) (per column)', marker='o',)
-    # ax[i].plot(g['columns'], g['reading_all(μs)'], label='reading_all(μs) (per column)', marker='o',)
-    # ax[i].plot(g['columns'], g['reading_100(μs)'], label='reading_100(μs) (per column)', marker='o',)
-    # ax[i].plot(g['columns'], g['reading_p1_100(μs)'], label='reading_p1_100(μs) (per column)', marker='o',)
-    ax[i].plot(g['columns'], g['reading_p2_100(μs)'], label='reading_p2_100(μs) (per column)', marker='o',)
+groups =  df.groupby(['chunk_size', 'rows', 'columns_to_read'])
+fig, ax = plt.subplots(len(groups), 3, sharex=True)
+i = 0
+
+for ((chunk_size, rows, columns_to_read), g) in groups:
+    title = "chunk_size={}, rows={}, columns_to_read={}, TOTAL TIME".format(chunk_size, rows, columns_to_read)
+    print(title)
+
+    ax[i, 0].set_title(title)
+    ax[i, 1].set_title("Opening File")
+    ax[i, 2].set_title("Data Reading")
+
+    ax[i, 0].set_ylabel("μs/column")
+    ax[i, 1].set_ylabel("μs/column")
+    ax[i, 2].set_ylabel("μs/column")
+
+    for (name, g2) in g.groupby(['name']):
+        
+        ax[i, 0].plot(g2['columns'], g2['reading(μs)'], label=name, marker='o',)
+        ax[i, 1].plot(g2['columns'], g2['reading_p1(μs)'], label=name, marker='o',)
+        ax[i, 2].plot(g2['columns'], g2['reading_p2(μs)'], label=name, marker='o',)
 
     i+=1
+    
+    plt.legend()
+
+ax[-1, 0].set_xlabel("columns")
+ax[-1, 1].set_xlabel("columns")
+ax[-1, 2].set_xlabel("columns")
 
 fig.suptitle(path)
 plt.legend()
