@@ -118,6 +118,7 @@ for chunk_size in chunks_list:
             # NOT NULL  
             ##################
             table = make_table(nullable=False)
+            """
             t, t1, t2 = writing_parameters(table=table, chunk_size=chunk_size, use_dictionary=True, write_statistics=False, compression=None)
             data.append(['write_use_dictionary', columns, rows, chunk_size, 100, t, t1, t2])
 
@@ -132,6 +133,7 @@ for chunk_size in chunks_list:
 
             t, t1, t2 = read_use_dataset(table=table, chunk_size=chunk_size)
             data.append(['read_use_dataset', columns, rows, chunk_size, 100, t, t1, t2])
+            """
 
             t, t1, t2 = writing_parameters(table=table, chunk_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None)
             data.append(['fast', columns, rows, chunk_size, 100, t, t1, t2])
@@ -142,12 +144,16 @@ for chunk_size in chunks_list:
             ##################
             # NULLABLE
             ##################
+            """
             table = make_table(nullable=True)
             t, t1, t2 = writing_parameters(table=table, chunk_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None)
             data.append(['fast_nullable', columns, rows, chunk_size, 100, t, t1, t2])
 
+            
             del table
             gc.collect()
+            """
+
 
 with open('pyarrow_results.csv', 'w', encoding='UTF8', newline='') as f:
 

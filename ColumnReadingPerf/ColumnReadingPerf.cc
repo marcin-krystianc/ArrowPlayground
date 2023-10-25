@@ -11,6 +11,7 @@
 #include <random>
 #include <vector>
 #include <fstream>
+#include <filesystem>
 #include <iomanip>
 
 using arrow::Status;
@@ -115,15 +116,19 @@ namespace
     csvFile << "columns,rows,chunk_size,writing(μs),reading_all(μs),reading_100(μs),reading_p1_100(μs),reading_p2_100(μs)" << std::endl;
 
     std::list<int> nColumns = {
-        100, 200, 300, 400, 500, 600, 700, 800, 900,
-        1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-        10000, 12000, 14000, 16000, 18000, 20000
+        // 100, 200, 300, 400, 500, 600, 700, 800, 900,
+        // 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+        // 10000, 12000, 14000, 16000, 18000, 20000,
+        // 100, 200, 300, 400, 500, 600, 700, 800, 900, 
+        1000,
+        //, 10000
         };
 
     std::list<int64_t> chunk_sizes = {
     1000, 
-    10000};
-    std::list<int> rows_list = {10000};
+    10000, 
+    100000};
+    std::list<int> rows_list = {100000};
 
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);
@@ -135,8 +140,11 @@ namespace
         for (int nColumn : nColumns)
         {
           std::chrono::microseconds writing_dt;
+          
+          // if (!std::filesystem::exists(FILE_NAME))
           ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
 
+          // const int repeats = 3;
           const int repeats = 3;
           std::vector<std::chrono::microseconds> reading_all_dts(repeats);
           std::vector<std::chrono::microseconds> reading_100_dts(repeats);
@@ -157,9 +165,12 @@ namespace
                     << ", chunk_size=" << chunk_size
                     << ", writing_dt=" << writing_dt.count() / nColumn
                     << ", reading_all_dt=" << reading_all_dt.count() / nColumn
-                    << ", reading_100_dt=" << reading_100_dt.count() / 100
-                    << ", reading_100_dt1=" << reading_100_dt1.count() / 100
-                    << ", reading_100_dt2=" << reading_100_dt2.count() / 100
+                    << ", reading_100_dt=" << reading_100_dt.count()
+                    // << ", reading_100_dt=" << reading_100_dt.count() / 100
+                    // << ", reading_100_dt1=" << reading_100_dt1.count() / 100
+                    << ", reading_100_dt1=" << reading_100_dt1.count()
+                    // << ", reading_100_dt2=" << reading_100_dt2.count() / 100
+                    << ", reading_100_dt2=" << reading_100_dt2.count() 
                     << std::endl;
 
           csvFile << nColumn << ","
@@ -202,7 +213,7 @@ Status RunMain2(int argc, char **argv)
         ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
 
         std::cerr << "Reading columns" << std::endl;
-        const int repeats = 3;
+        const int repeats = 30;
         std::vector<std::chrono::microseconds> reading_100_dts(repeats);
         std::vector<std::chrono::microseconds> reading_100_dts1(repeats);
         std::vector<std::chrono::microseconds> reading_100_dts2(repeats);
@@ -219,7 +230,7 @@ Status RunMain2(int argc, char **argv)
                   << ", chunk_size=" << chunk_size
                   //<< ", writing_dt=" << writing_dt.count() / nColumn
                   //<< ", reading_all_dt=" << reading_all_dt.count() / nColumn
-                  << ", reading_100_dt=" << reading_100_dt.count() / 100
+                  << ", reading_100_dt=" << reading_100_dt.count()
                   << ", reading_100_dt1=" << reading_100_dt1.count() / 100
                   << ", reading_100_dt2=" << reading_100_dt2.count() / 100
                   << std::endl;
