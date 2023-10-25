@@ -18,7 +18,7 @@ using arrow::Status;
 
 namespace
 {
-  const char *FILE_NAME = "/tmp/my_cpp.parquet";
+  const char *FILE_NAME = "/mnt/ramfs/my.parquet";
 
   std::shared_ptr<arrow::Table> GetTable(size_t nColumns, size_t nRows)
   {
@@ -61,6 +61,7 @@ namespace
     auto properties = builder
                           .max_row_group_length(chunkSize)
                           ->disable_dictionary()
+                          ->disable_statistics()
                           ->build();
     PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, chunkSize, properties));
     auto end = std::chrono::steady_clock::now();
@@ -95,15 +96,13 @@ namespace
   Status RunMain(int argc, char **argv)
   {
     std::ofstream csvFile;
-    csvFile.open("arrow_benchmarks.csv", std::ios_base::out); // append instead of overwrite
+    csvFile.open("arrow_results.csv", std::ios_base::out); // append instead of overwrite
     csvFile << "name,columns,rows,chunk_size,columns_to_read,reading(μs),reading_p1(μs),reading_p2(μs)" << std::endl;
 
-    std::list<int> nColumns = {
-        100, 200, 300, 400, 500, 600, 700, 800, 900,
-        1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
+    std::list<int> nColumns = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
 
-    std::list<int64_t> chunk_sizes = {1000, 10000};
-    std::list<int> rows_list = {10000};
+    std::list<int64_t> chunk_sizes = {2000, 20000};
+    std::list<int> rows_list = {20000};
 
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);

@@ -14,18 +14,13 @@ t_write = []
 path = "/mnt/ramfs/my.parquet"
 
 columns_list = [
-                100, 200, 300, 400, 500, 600, 700, 800, 900,
                 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10_000
-                # 12_000, 14_000, 16_000, 18_000, 20_000, 
-                #1_000, 
-                # 1000, 2000
-                # 20_000
                 ]
 
-chunks_list = [1_000, 10_000]
-rows_lsit = [10_000]
+chunks_list = [2_000, 20_000]
+rows_lsit = [20_000]
 data = []
-repeats = 5
+repeats = 3
 
 def writing_parameters (table, chunk_size, use_dictionary, write_statistics, compression, columns_to_read = 100):
     
@@ -73,7 +68,7 @@ def read_use_dataset (table, chunk_size, columns_to_read = 100):
         del res_data
         gc.collect()
 
-    return min(t_read) * 1_000_000, 0, 0
+    return min(t_read) * 1_000_000, float("nan"), float("nan")
 
 def read_with_external_schema (table, chunk_size, columns_to_read = 100):
               
@@ -154,7 +149,7 @@ for chunk_size in chunks_list:
             del table
             gc.collect()
 
-with open('results_python2.csv', 'w', encoding='UTF8', newline='') as f:
+with open('pyarrow_results.csv', 'w', encoding='UTF8', newline='') as f:
 
     writer = csv.writer(f)
         # write the header

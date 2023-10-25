@@ -29,11 +29,16 @@ for ((chunk_size, rows, columns_to_read), g) in groups:
     ax[i, 1].set_ylabel("μs/column")
     ax[i, 2].set_ylabel("μs/column")
 
-    for (name, g2) in g.groupby(['name']):
-        
+    for (name, g2) in g.groupby(['name']):        
+
         ax[i, 0].plot(g2['columns'], g2['reading(μs)'], label=name, marker='o',)
         ax[i, 1].plot(g2['columns'], g2['reading_p1(μs)'], label=name, marker='o',)
         ax[i, 2].plot(g2['columns'], g2['reading_p2(μs)'], label=name, marker='o',)
+
+        ax[i, 0].set_ylim(bottom=0, auto=True)
+        ax[i, 1].set_ylim(bottom=0, auto=True)
+        ax[i, 2].set_ylim(bottom=0, auto=True)
+        
 
     i+=1
     
