@@ -24,7 +24,7 @@ namespace
   std::shared_ptr<arrow::Table> GetTable(size_t nColumns, size_t nRows)
   {
     std::random_device dev;
-    std::mt19937 rng(dev());
+    std::default_random_engine rng(dev());
     std::uniform_real_distribution<> rand_gen(0.0, 1.0);
 
     std::vector<std::shared_ptr<arrow::Array>> arrays;
@@ -33,7 +33,7 @@ namespace
     // For simplicity, we'll create int32 columns. You can expand this to handle other types.
     for (int i = 0; i < nColumns; i++)
     {
-      arrow::DoubleBuilder builder;
+      arrow::FloatBuilder builder;
       for (auto j = 0; j < nRows; j++)
       {
         if (!builder.Append(rand_gen(rng)).ok())
@@ -45,7 +45,7 @@ namespace
         throw std::runtime_error("builder.Finish");
 
       arrays.push_back(array);
-      fields.push_back(arrow::field("c_" + std::to_string(i), arrow::float64(), false));
+      fields.push_back(arrow::field("c_" + std::to_string(i), arrow::float32(), false));
     }
 
     auto table = arrow::Table::Make(arrow::schema(fields), arrays);

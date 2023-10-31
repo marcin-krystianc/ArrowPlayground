@@ -13,12 +13,13 @@ df['reading(μs)'] =    df['reading(μs)'] /    df['columns_to_read']
 df['reading_p1(μs)'] = df['reading_p1(μs)'] / df['columns_to_read']
 df['reading_p2(μs)'] = df['reading_p2(μs)'] / df['columns_to_read']
 
-groups =  df.groupby(['chunk_size', 'rows', 'columns_to_read'])
+groups =  df.groupby(['chunk_size', 'columns', 'columns_to_read'])
 fig, ax = plt.subplots(len(groups), 3, sharex=True)
 i = 0
+x_axis = 'rows'
 
-for ((chunk_size, rows, columns_to_read), g) in groups:
-    title = "chunk_size={}, rows={}, columns_to_read={}, TOTAL TIME".format(chunk_size, rows, columns_to_read)
+for ((chunk_size, columns, columns_to_read), g) in groups:
+    title = "chunk_size={}, columns={}, columns_to_read={}, TOTAL TIME".format(chunk_size, columns, columns_to_read)
     print(title)
 
     ax[i, 0].set_title(title)
@@ -31,9 +32,9 @@ for ((chunk_size, rows, columns_to_read), g) in groups:
 
     for (name, g2) in g.groupby(['name']):        
 
-        ax[i, 0].plot(g2['columns'], g2['reading(μs)'], label=name, marker='.',)
-        ax[i, 1].plot(g2['columns'], g2['reading_p1(μs)'], label=name, marker='.',)
-        ax[i, 2].plot(g2['columns'], g2['reading_p2(μs)'], label=name, marker='.',)
+        ax[i, 0].plot(g2[x_axis], g2['reading(μs)'], label=name, marker='.',)
+        ax[i, 1].plot(g2[x_axis], g2['reading_p1(μs)'], label=name, marker='.',)
+        ax[i, 2].plot(g2[x_axis], g2['reading_p2(μs)'], label=name, marker='.',)
 
         ax[i, 0].set_ylim(bottom=0, auto=True)
         ax[i, 1].set_ylim(bottom=0, auto=True)
@@ -42,14 +43,13 @@ for ((chunk_size, rows, columns_to_read), g) in groups:
         ax[i, 1].grid(visible=True)
         ax[i, 2].grid(visible=True)
         
-
     i+=1
     
     plt.legend()
 
-ax[-1, 0].set_xlabel("columns")
-ax[-1, 1].set_xlabel("columns")
-ax[-1, 2].set_xlabel("columns")
+ax[-1, 0].set_xlabel(x_axis)
+ax[-1, 1].set_xlabel(x_axis)
+ax[-1, 2].set_xlabel(x_axis)
 
 fig.suptitle(path)
 plt.legend()
