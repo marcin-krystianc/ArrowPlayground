@@ -64,7 +64,14 @@ namespace
                           ->disable_dictionary()
                           ->disable_statistics()
                           ->build();
-    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, chunkSize, properties));
+
+    parquet::ArrowWriterProperties::Builder arrowWriterPropertiesBuilder;          
+    auto arrowWriterProperties = arrowWriterPropertiesBuilder
+      .set_use_threads(false)
+      // .store_schema()
+      ->build();
+
+    PARQUET_THROW_NOT_OK(parquet::arrow::WriteTable(*table, arrow::default_memory_pool(), outfile, chunkSize, properties, arrowWriterProperties));
     auto end = std::chrono::steady_clock::now();
     *dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
     return Status::OK();
@@ -103,9 +110,14 @@ namespace
     csvFile.open("arrow_results.csv", std::ios_base::out); // append instead of overwrite
     csvFile << "name,columns,rows,row_groups,data_page_size,columns_to_read,reading(μs),reading_p1(μs),reading_p2(μs)" << std::endl;
 
+    // std::vector<int> nColumns = {1000};
+    // std::vector<int> rows_list = {10};
+    // std::vector<int64_t> chunk_sizes = {1};
     std::vector<int> nColumns = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
-    std::vector<int64_t> chunk_sizes = {10000, 100000};
-    std::vector<int> rows_list = {10000, 50000};
+    std::vector<int> rows_list = {50000};
+    std::vector<int64_t> chunk_sizes = {1000, 50000};
+    const int repeats = 3;
+    //const int repeats = 3000;
 
     std::vector<int> indicies(100);
     std::iota(indicies.begin(), indicies.end(), 0);
@@ -121,8 +133,6 @@ namespace
           // if (!std::filesystem::exists(FILE_NAME))
           ARROW_RETURN_NOT_OK(WriteTableToParquet(nColumn, nRow, FILE_NAME, &writing_dt, chunk_size));
 
-          const int repeats = 3;
-          //const int repeats = 3000;
           std::vector<std::chrono::microseconds> reading_100_dts(repeats);
           std::vector<std::chrono::microseconds> reading_100_dts1(repeats);
           std::vector<std::chrono::microseconds> reading_100_dts2(repeats);

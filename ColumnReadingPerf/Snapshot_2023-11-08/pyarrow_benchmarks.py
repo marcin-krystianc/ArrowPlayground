@@ -14,14 +14,16 @@ t_write = []
 path = "/mnt/ramfs/my_ramfs.parquet"
 base_dir = "/mnt/ramfs/"
 
-columns_list = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
-chunks_list = [10_000, 100_000]
+#columns_list = [1000]
 #chunks_list = [1]
-#rows_list = range(10_000, 50_000)
-rows_list = [10_000, 50_000]
+#rows_list = [1000]
+#repeats = 30000
+columns_list = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+chunks_list = [1_000, 50_000]
+rows_list = [50_000]
 data = []
-# repeats = 3
 repeats = 3
+
 data_page_size = 1024 * 1024 * 1024
 
 def read_with_parquet_reader (columns_to_read = 100):
@@ -67,9 +69,11 @@ def read_with_external_schema (columns_to_read = 100,):
     
     for i in range(0, repeats):
        
+
         t = time.time()
-        # pr = pq.ParquetReader()
+        pr = pq.ParquetReader()
         pr.open(path, metadata=metadata)
+
         #pr.open(path)
         row_groups = [i for i in range(pr.num_row_groups)]
         p1 = time.time() - t
@@ -101,14 +105,22 @@ for chunk_size in chunks_list:
             # NULLABLE
             ##################
             table = make_table(nullable=False)
-
-            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, data_page_size = data_page_size)
+            
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, data_page_size = data_page_size, store_schema = True)
             t, t1, t2 = read_with_external_schema()
-            data.append(['read_with_external_metadata', columns, rows, chunk_size, data_page_size, 100, t, t1, t2])
+            data.append(['read_external_metadata_store_true', columns, rows, chunk_size, data_page_size, 100, t, t1, t2])
+            
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, data_page_size = data_page_size, store_schema = False)
+            t, t1, t2 = read_with_external_schema()
+            data.append(['read_external_metadata_store_false', columns, rows, chunk_size, data_page_size, 100, t, t1, t2])
 
-            # pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, data_page_size = data_page_size)
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, data_page_size = data_page_size, store_schema = True)
             t, t1, t2 = read_with_parquet_reader()
-            data.append(['fast', columns, rows, chunk_size, data_page_size, 100, t, t1, t2])
+            data.append(['read_store_true', columns, rows, chunk_size, data_page_size, 100, t, t1, t2])
+            
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, data_page_size = data_page_size, store_schema = False)
+            t, t1, t2 = read_with_parquet_reader()
+            data.append(['read_store_false', columns, rows, chunk_size, data_page_size, 100, t, t1, t2])
 
             #ds.write_dataset(table, base_dir, format="parquet", partitioning=ds.partitioning(pa.schema([("year", pa.int16())])))
             
