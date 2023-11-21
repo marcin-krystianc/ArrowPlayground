@@ -39,7 +39,9 @@ RUN apt-get update && \
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
 RUN git clone https://github.com/apache/arrow.git && \
-    cd arrow 
+    cd arrow && \
+    git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
+	git fetch --all
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
