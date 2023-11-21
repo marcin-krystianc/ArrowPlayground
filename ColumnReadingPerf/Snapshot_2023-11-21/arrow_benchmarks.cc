@@ -145,8 +145,8 @@ namespace
   {
     auto index_file_name = filename + " .index";
 
-    // Prepare metadata for a prticulrar row group.
-    // This is not taken into acount for measurement, because it is going to be done only once per parquet file.
+    // Prepare metadata for a particular row group.
+    // This is not taken into account for measurement, because it is going to be done only once per parquet file.
     {
       std::shared_ptr<arrow::io::ReadableFile> infile;
       ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
