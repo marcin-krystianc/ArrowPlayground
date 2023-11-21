@@ -143,38 +143,62 @@ namespace
 
   Status ReadRwoGroupWithRowSubsetMetadata(const std::string &filename, int row_group, std::vector<int> column_indicies, std::chrono::microseconds *dt, std::chrono::microseconds *dt1, std::chrono::microseconds *dt2)
   {
-    std::shared_ptr<arrow::io::ReadableFile> infile;
-    ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
-    auto metadata = parquet::ReadMetaData(infile);
+    auto index_file_name = filename + " .index";
 
-    std::vector<int> row_groups = {row_group};
-    auto single_row_metadata_tmp = metadata.get()->Subset(row_groups);
+    // Prepare metadata for a prticulrar row group.
+    // This is not taken into acount for measurement, because it is going to be done only once per parquet file.
+    {
+      std::shared_ptr<arrow::io::ReadableFile> infile;
+      ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
+      auto metadata = parquet::ReadMetaData(infile);
+
+      std::vector<int> row_groups = {row_group};
+      auto single_row_metadata_tmp = metadata.get()->Subset(row_groups);
+      std::shared_ptr<arrow::io::BufferOutputStream> stream;
+      ARROW_ASSIGN_OR_RAISE(stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
+      single_row_metadata_tmp.get()->WriteTo(stream.get());
+      std::shared_ptr<arrow::Buffer> thrift_buffer;
+      ARROW_ASSIGN_OR_RAISE(thrift_buffer, stream.get()->Finish());
+
+      std::ofstream index_file(index_file_name, std::ios::binary);
+      index_file.write((const char*)thrift_buffer.get()->data(), thrift_buffer.get()->size());
+      index_file.close();
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // DT1 Begin
     ///////////////////////////////////////////////////////////////////////////
-    auto begin = std::chrono::steady_clock::now();
-    std::shared_ptr<arrow::io::BufferOutputStream> stream;
-    ARROW_ASSIGN_OR_RAISE(stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
-    single_row_metadata_tmp.get()->WriteTo(stream.get());
-    std::shared_ptr<arrow::Buffer> thrift_buffer;
-    ARROW_ASSIGN_OR_RAISE(thrift_buffer, stream.get()->Finish());
-    
-    uint32_t read_metadata_len = thrift_buffer.get()->size();
-    auto single_row_metadata = parquet::FileMetaData::Make(thrift_buffer.get()->data(), &read_metadata_len);
-
-    auto readerProperties = parquet::default_reader_properties();
-    auto arrowReaderProperties = parquet::default_arrow_reader_properties();
-    arrowReaderProperties.set_pre_buffer(true);
-
-    parquet::arrow::FileReaderBuilder fileReaderBuilder;
-    fileReaderBuilder.properties(arrowReaderProperties);
-    ARROW_RETURN_NOT_OK(fileReaderBuilder.OpenFile(filename, false, readerProperties, single_row_metadata));
     std::unique_ptr<parquet::arrow::FileReader> reader;
-    ARROW_ASSIGN_OR_RAISE(reader, fileReaderBuilder.Build());
+    {
+      auto begin = std::chrono::steady_clock::now();
+  
+      // 1. Read metadata for a row group from the external file.
+      std::ifstream index_file(index_file_name, std::ios::binary);
+      index_file.seekg(0, std::ios::end);
+      size_t index_file_length = index_file.tellg();
+      index_file.seekg(0, std::ios::beg);
+      std::vector<char> buffer (index_file_length);
+      index_file.read(&buffer[0], index_file_length);
+      index_file.close();
 
-    auto end = std::chrono::steady_clock::now();
-    *dt1 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+      // 2. Deserialize the metadata
+      uint32_t read_metadata_len = index_file_length;
+      auto single_row_metadata = parquet::FileMetaData::Make(&buffer[0], &read_metadata_len);
+
+      auto readerProperties = parquet::default_reader_properties();
+      auto arrowReaderProperties = parquet::default_arrow_reader_properties();
+      arrowReaderProperties.set_pre_buffer(true);
+
+      parquet::arrow::FileReaderBuilder fileReaderBuilder;
+      fileReaderBuilder.properties(arrowReaderProperties);
+
+      // 3. Open the file using metadata for a row group  
+      ARROW_RETURN_NOT_OK(fileReaderBuilder.OpenFile(filename, false, readerProperties, single_row_metadata));
+      ARROW_ASSIGN_OR_RAISE(reader, fileReaderBuilder.Build());
+
+      auto end = std::chrono::steady_clock::now();
+      *dt1 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // DT1 End
@@ -183,12 +207,15 @@ namespace
     ///////////////////////////////////////////////////////////////////////////
     // DT2 Begin
     ///////////////////////////////////////////////////////////////////////////
-    begin = std::chrono::steady_clock::now();
-    std::shared_ptr<arrow::Table> parquet_table;
-    // Read the table.
-    ARROW_RETURN_NOT_OK(reader->ReadRowGroup(0, column_indicies, &parquet_table));
-    end = std::chrono::steady_clock::now();
-    *dt2 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    {
+      auto begin = std::chrono::steady_clock::now();
+      std::shared_ptr<arrow::Table> parquet_table;
+      // Read the table.
+      ARROW_RETURN_NOT_OK(reader->ReadRowGroup(0, column_indicies, &parquet_table));
+      auto end = std::chrono::steady_clock::now();
+      *dt2 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // DT2 End
     ///////////////////////////////////////////////////////////////////////////
@@ -233,8 +260,7 @@ namespace
     csvFile.open("arrow_results.csv", std::ios_base::out); // append instead of overwrite
     csvFile << "name,columns,rows,chunk_size,data_page_size,columns_to_read,reading(μs),reading_p1(μs),reading_p2(μs)" << std::endl;
 
-    //std::vector<int> nColumns = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
-    std::vector<int> nColumns = {1000, 2000};
+    std::vector<int> nColumns = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
     std::vector<int> rows_list = {50000};
     std::vector<int64_t> chunk_sizes = {100, 1000, 50000};
     const int repeats = 10;
