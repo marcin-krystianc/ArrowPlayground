@@ -25,6 +25,21 @@ RUN apt-get update && \
 	binutils \
 	linux-tools-generic \
 	valgrind \
+
+	# perf
+	xz-utils \
+    flex \
+    bison \
+    libelf-dev \
+    systemtap-sdt-dev \
+    libslang2-dev \
+    libcap-dev \
+    libperl-dev \
+    libpfm4-dev \
+    libnuma-dev \
+    libtraceevent-dev \
+	
+	# other-tools
 	ninja-build \
 	build-essential \
 	net-tools \
@@ -35,6 +50,12 @@ RUN apt-get update && \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& echo
+
+WORKDIR /
+RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
+    tar -xf ./linux-6.4.16.tar.xz && \
+    cd linux-6.4.16/tools/perf/ && \
+    make -C . && make install
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
