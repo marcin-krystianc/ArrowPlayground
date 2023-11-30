@@ -19,17 +19,13 @@ namespace ColumnReadingPerfNet
                 const string pathSharp = @"d:\tmp\my_sharp.parquet";
                 const string pathNet = @"d:\tmp\my_net.parquet";
                 var data = GetData().ToArray();
-                await SaveToParquet2Sharp(data, pathSharp);
+                // await SaveToParquet2Sharp(data, pathSharp);
                 await SaveToParquet2Net(data, pathNet);
 
-                /*
-                
                 var columnsList = new[]
                 {
-                    //100, 200, 300, 400, 500, 600, 700, 800, 900,
-                    //1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
-                    //10000, 20000, 30000, 40000, 
-                    50000
+                    1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+                    10000, 11000, 12000, 13000, 14000, 15000
                 };
 
                 var rowsList = new[] { 5000, };
@@ -37,12 +33,12 @@ namespace ColumnReadingPerfNet
                 foreach (var rows in rowsList)
                 foreach (var columns in columnsList)
                 {
-                    await WriteData(path, columns, rows);
+                    await WriteData(pathNet, columns, rows);
                     var elapsedMicroseconds = new List<long>();
                     for (int i = 0; i < 3; i++)
                     {
                         var sw = Stopwatch.StartNew();
-                        await ReadData(path);
+                        await ReadData(pathNet);
                         sw.Stop();
 
                         elapsedMicroseconds.Add((long)sw.Elapsed.TotalMicroseconds / 100);
@@ -50,7 +46,6 @@ namespace ColumnReadingPerfNet
 
                     Console.WriteLine($"Columns={columns}, rows={rows}, Reading_100={elapsedMicroseconds.Min()}");
                 }
-                */
             }
 
             static async Task WriteData(string path, int columns, int rows)
@@ -65,6 +60,8 @@ namespace ColumnReadingPerfNet
                 {
                     using (ParquetWriter writer = await ParquetWriter.CreateAsync(schema, fs))
                     {
+                        writer.CompressionMethod = CompressionMethod.None;
+                        
                         using (ParquetRowGroupWriter groupWriter = writer.CreateRowGroup())
                         {
                             Console.WriteLine("data");

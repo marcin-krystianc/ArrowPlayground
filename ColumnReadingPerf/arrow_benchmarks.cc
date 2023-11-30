@@ -14,6 +14,7 @@
 #include <fstream>
 #include <filesystem>
 #include <iomanip>
+#include <unistd.h>
 
 using arrow::Status;
 
@@ -172,74 +173,87 @@ namespace
     *dt = *dt1 + *dt2;
     return Status::OK();
   }
-
+  
   Status ReadRwoGroupWithRowSubsetMetadata(const std::string &filename, int row_group, std::vector<int> column_indicies, std::chrono::microseconds *dt, std::chrono::microseconds *dt1, std::chrono::microseconds *dt2)
   {
-    std::shared_ptr<arrow::io::ReadableFile> infile;
-    ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
-    auto metadata = parquet::ReadMetaData(infile);
+    auto index_file_name = filename + " .index";
 
-    std::vector<int> row_groups = {row_group};
-    auto single_row_metadata_tmp = metadata.get()->Subset(row_groups);
-    
-    /*
-    uint32_t metadata_len0;
+    // Prepare metadata for a particular row group.
+    // This is not taken into account for measurement, because it is going to be done only once per parquet file.
     {
-      std::shared_ptr<arrow::io::BufferOutputStream> stream_tmp0;
-      ARROW_ASSIGN_OR_RAISE(stream_tmp0, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
-      single_row_metadata_tmp.get()->WriteTo(stream_tmp0.get());
+      std::shared_ptr<arrow::io::ReadableFile> infile;
+      ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
+      auto metadata = parquet::ReadMetaData(infile);
+
+      std::vector<int> row_groups = {row_group};
+      auto single_row_metadata_tmp = metadata.get()->Subset(row_groups);
+      std::shared_ptr<arrow::io::BufferOutputStream> stream;
+      ARROW_ASSIGN_OR_RAISE(stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
+      single_row_metadata_tmp.get()->WriteTo(stream.get());
       std::shared_ptr<arrow::Buffer> thrift_buffer;
-      ARROW_ASSIGN_OR_RAISE(thrift_buffer, stream_tmp0.get()->Finish());
-      metadata_len0 = thrift_buffer.get()->size();
+      ARROW_ASSIGN_OR_RAISE(thrift_buffer, stream.get()->Finish());
+
+      std::ofstream index_file(index_file_name, std::ios::binary);
+      index_file.write((const char*)thrift_buffer.get()->data(), thrift_buffer.get()->size());
+      index_file.close();
     }
 
-    uint32_t metadata_len1;
-    {
-      std::shared_ptr<arrow::io::BufferOutputStream> stream_tmp1;
-      ARROW_ASSIGN_OR_RAISE(stream_tmp1, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
-      metadata.get()->WriteTo(stream_tmp1.get());
-      std::shared_ptr<arrow::Buffer> thrift_buffer;
-      ARROW_ASSIGN_OR_RAISE(thrift_buffer, stream_tmp1.get()->Finish());
-      metadata_len1 = thrift_buffer.get()->size();
-    }
-    std::cerr << "row_groups: " << metadata->num_row_groups() 
-    << " metadata_len0: " << metadata_len0 
-    << " metadata_len1: " << metadata_len1
-    << " ratio: " << double(metadata->num_row_groups() *  metadata_len0) / metadata_len1 
-    << std::endl;
-    */
-
-    auto begin = std::chrono::steady_clock::now();
-    std::shared_ptr<arrow::io::BufferOutputStream> stream;
-    ARROW_ASSIGN_OR_RAISE(stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
-    single_row_metadata_tmp.get()->WriteTo(stream.get());
-    std::shared_ptr<arrow::Buffer> thrift_buffer;
-    ARROW_ASSIGN_OR_RAISE(thrift_buffer, stream.get()->Finish());
-    
-    uint32_t read_metadata_len = thrift_buffer.get()->size();
-    auto single_row_metadata = parquet::FileMetaData::Make(thrift_buffer.get()->data(), &read_metadata_len);
-
-    auto readerProperties = parquet::default_reader_properties();
-    auto arrowReaderProperties = parquet::default_arrow_reader_properties();
-    arrowReaderProperties.set_pre_buffer(true);
-
-    parquet::arrow::FileReaderBuilder fileReaderBuilder;
-    fileReaderBuilder.properties(arrowReaderProperties);
-    ARROW_RETURN_NOT_OK(fileReaderBuilder.OpenFile(filename, false, readerProperties, single_row_metadata));
+    ///////////////////////////////////////////////////////////////////////////
+    // DT1 Begin
+    ///////////////////////////////////////////////////////////////////////////
     std::unique_ptr<parquet::arrow::FileReader> reader;
-    ARROW_ASSIGN_OR_RAISE(reader, fileReaderBuilder.Build());
+    {
+      auto begin = std::chrono::steady_clock::now();
+  
+      // 1. Read metadata for a row group from the external file.
+      std::ifstream index_file(index_file_name, std::ios::binary);
+      index_file.seekg(0, std::ios::end);
+      size_t index_file_length = index_file.tellg();
+      index_file.seekg(0, std::ios::beg);
+      std::vector<char> buffer (index_file_length);
+      index_file.read(&buffer[0], index_file_length);
+      index_file.close();
 
-    auto end = std::chrono::steady_clock::now();
-    *dt1 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+      // 2. Deserialize the metadata
+      uint32_t read_metadata_len = index_file_length;
+      auto single_row_metadata = parquet::FileMetaData::Make(&buffer[0], &read_metadata_len);
 
-    begin = std::chrono::steady_clock::now();
-    std::shared_ptr<arrow::Table> parquet_table;
-    // Read the table.
-    ARROW_RETURN_NOT_OK(reader->ReadRowGroup(0, column_indicies, &parquet_table));
+      auto readerProperties = parquet::default_reader_properties();
+      auto arrowReaderProperties = parquet::default_arrow_reader_properties();
+      arrowReaderProperties.set_pre_buffer(true);
 
-    end = std::chrono::steady_clock::now();
-    *dt2 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
-    *dt = *dt1 + *dt2;
+      parquet::arrow::FileReaderBuilder fileReaderBuilder;
+      fileReaderBuilder.properties(arrowReaderProperties);
+
+      // 3. Open the file using metadata for a row group  
+      ARROW_RETURN_NOT_OK(fileReaderBuilder.OpenFile(filename, false, readerProperties, single_row_metadata));
+      ARROW_ASSIGN_OR_RAISE(reader, fileReaderBuilder.Build());
+
+      auto end = std::chrono::steady_clock::now();
+      *dt1 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // DT1 End
+    ///////////////////////////////////////////////////////////////////////////
+   
+    ///////////////////////////////////////////////////////////////////////////
+    // DT2 Begin
+    ///////////////////////////////////////////////////////////////////////////
+    {
+      auto begin = std::chrono::steady_clock::now();
+      std::shared_ptr<arrow::Table> parquet_table;
+      // Read the table.
+      ARROW_RETURN_NOT_OK(reader->ReadRowGroup(0, column_indicies, &parquet_table));
+      auto end = std::chrono::steady_clock::now();
+      *dt2 = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // DT2 End
+    ///////////////////////////////////////////////////////////////////////////
+
+    *dt = *dt1 + *dt2;    
     return Status::OK();
   }
 
@@ -292,7 +306,7 @@ namespace
   Status ReadMetadata(const std::string &filename)
   {
     std::list<std::shared_ptr<parquet::FileMetaData>> list;
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 10000; i++)
     {
       std::shared_ptr<arrow::io::ReadableFile> infile;
       ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
@@ -306,7 +320,7 @@ namespace
       // auto impl = metadata->impl_.get();
       // auto format = metadata->GetFormat();
 
-      list.push_back(metadata);
+      // list.push_back(metadata);
       std::cerr << i << std::endl;
     }
 
@@ -425,8 +439,19 @@ namespace
   }
 } // namespace
 
+void DoSOmething()
+{
+  sleep(1);
+  for(int i=0; i< 100; i++)
+  {
+    std::cerr << " writing file" << std::endl;
+  }
+}
+
 int main(int argc, char **argv)
 {
+  // DoSOmething();
+
   /*
   TheMetadata m1;
   TheMetadata *m2 = &m1;
@@ -438,15 +463,25 @@ int main(int argc, char **argv)
   auto a2 = m2->GetValue();
   auto a3 = m3->GetValue();
   */
+  
+  
+  if (!std::filesystem::exists(FILE_NAME))
+  {
+    std::cerr << " writing file (wait what?" << std::endl;
+    std::chrono::microseconds writing_dt;
+    WriteTableToParquet(1000, 100, FILE_NAME, &writing_dt, 1);
+  }
+  ReadMetadata(FILE_NAME);
 
+  /*
   std::cerr << " writing file" << std::endl;
   // if (!std::filesystem::exists(FILE_NAME))
   std::chrono::microseconds writing_dt;
-  // WriteTableToParquet(10000, 1000, FILE_NAME, &writing_dt, 1);
+  WriteTableToParquet(10000, 100, FILE_NAME, &writing_dt, 1);
   std::cerr << " reading file" << std::endl;
   // ReadFileContent(FILE_NAME);
 
-  // ReadMetadata(FILE_NAME);
+  ReadMetadata(FILE_NAME);
 
   Status st = RunMain(argc, argv);
   if (!st.ok())
@@ -454,5 +489,6 @@ int main(int argc, char **argv)
     std::cerr << st << std::endl;
     return 1;
   }
+  */
   return 0;
 }
