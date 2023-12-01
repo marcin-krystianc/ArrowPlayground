@@ -20,3 +20,6 @@ include(GNUInstallDirs)
 install(TARGETS rapid_parquet
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+configure_file(rapid_parquet.pc.in rapid_parquet.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/rapid_parquet.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
