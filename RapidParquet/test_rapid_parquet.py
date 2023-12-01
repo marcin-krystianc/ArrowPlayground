@@ -1,6 +1,7 @@
 # ctypes_test.py
 import ctypes
 import pathlib
+import rapid_parquet
 
 if __name__ == "__main__":
     # Load the shared library into ctypes

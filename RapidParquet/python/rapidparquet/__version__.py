@@ -1,6 +1,6 @@
-__title__ = "requests"
+__title__ = "rapidparquet"
 __description__ = "Rapid parquet files opening"
-__url__ = "https://requests.readthedocs.io"
+__url__ = "https://github.com/marcin-krystianc"
 __version__ = "0.0.1"
 __build__ = 0x023100
 __author__ = "Marcin Krystianc"

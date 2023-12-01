@@ -15,7 +15,7 @@ if CURRENT_PYTHON < REQUIRED_PYTHON:
 ==========================
 Unsupported Python version
 ==========================
-This version of Parquet_Rapid requires at least Python {}.{}, but
+This version of RapidParquet requires at least Python {}.{}, but
 you're trying to install it on Python {}.{}. To resolve this,
 consider upgrading to a supported Python version.
 
@@ -67,7 +67,7 @@ test_requirements = [
 
 about = {}
 here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, "rapid-parquet", "__version__.py"), "r", "utf-8") as f:
+with open(os.path.join(here, "rapidparquet", "__version__.py"), "r", "utf-8") as f:
     exec(f.read(), about)
 
 with open("README.md", "r", "utf-8") as f:
@@ -82,9 +82,9 @@ setup(
     author=about["__author__"],
     author_email=about["__author_email__"],
     url=about["__url__"],
-    packages=["requests"],
+    packages=["rapidparquet"],
     package_data={"": ["LICENSE", "NOTICE"]},
-    package_dir={"": "src"},
+    package_dir={"": "."},
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=requires,
