@@ -5,6 +5,7 @@ from codecs import open
 
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
+from Cython.Build import cythonize
 
 CURRENT_PYTHON = sys.version_info[:2]
 REQUIRED_PYTHON = (3, 7)
@@ -90,6 +91,7 @@ setup(
     install_requires=requires,
     license=about["__license__"],
     zip_safe=False,
+    ext_modules=cythonize("rapidparquet/my_cython_code.pyx"),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",

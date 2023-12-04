@@ -1,3 +1,5 @@
-/rapid_parquet.egg-info
+/rapidparquet.egg-info
 /dist
 /build
+__pycache__
+*.so
