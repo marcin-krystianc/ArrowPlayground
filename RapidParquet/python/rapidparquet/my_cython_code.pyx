@@ -1,3 +1,5 @@
+# from cython.cimports import crapid_parquet
+
 # Declare the function signature with cdef for Cython optimization
 cdef int calculate_factorial(int n):
     if n == 0:

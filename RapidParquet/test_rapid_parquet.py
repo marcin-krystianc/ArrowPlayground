@@ -12,4 +12,5 @@ if __name__ == "__main__":
 print ("hello world:")
 result = rp.my_add(2,3)
 metada = rp.my_metadata('/workspace/tmp/my.parquet')
+result = rp.factorial(5)
 {}

@@ -15,8 +15,8 @@ t_write = []
 path = "/mnt/ramfs/my_ramfs.parquet"
 base_dir = "/mnt/ramfs/"
 
-columns_list = [1000, 2000]
-chunks_list = [100]
+columns_list = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+chunks_list = [10]
 rows_list = [100]
 #repeats = 30000
 #columns_list = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
@@ -35,8 +35,7 @@ def read_with_parquet_reader (columns_to_read = 100):
     t_read_p1 = []
     t_read_p2 = []
 
-    for i in range(0, repeats):
-        
+    for i in range(0, repeats):        
 
         t = time.time()
         pr = pq.ParquetReader()
@@ -67,7 +66,18 @@ def read_with_external_metadata (columns_to_read = 100,):
  
     pr = pq.ParquetReader()
     pr.open(path)
-    metadata = pr.metadata
+    for i in range(0, 100000):
+
+        pr = pq.ParquetReader()
+        pr.open(path)
+        metadata = pr.metadata
+
+        a = pq
+        c = pq.core._stringify_path('fasdf')
+        d = pq.core._parquet
+        #e =  pq.core._parquet._reconstruct_filemetadata('fasdf')
+        # f = metadata._metadata
+        # f= f
     
     for i in range(0, repeats):
        

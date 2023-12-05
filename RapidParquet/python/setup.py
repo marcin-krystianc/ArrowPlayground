@@ -4,6 +4,7 @@ import sys
 from codecs import open
 
 from setuptools import setup
+from distutils.extension import Extension
 from setuptools.command.test import test as TestCommand
 from Cython.Build import cythonize
 
@@ -91,7 +92,9 @@ setup(
     install_requires=requires,
     license=about["__license__"],
     zip_safe=False,
-    ext_modules=cythonize("rapidparquet/my_cython_code.pyx"),
+    ext_modules=cythonize(["rapidparquet/my_cython_code.pyx",
+                          Extension("queue", [],libraries=["arrow", "parquet"])
+    ]),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
@@ -112,7 +115,7 @@ setup(
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Arrow",
         "Topic :: Software Development :: Libraries",
-    ],
+    ],    
     cmdclass={"test": PyTest},
     tests_require=test_requirements,
     extras_require={
