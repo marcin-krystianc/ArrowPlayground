@@ -1,3 +1,6 @@
+# distutils: sources = rapid_parquet.cc
+# distutils: include_dirs = 
+
 from cython.cimports import crapid_parquet
 
 # Declare the function signature with cdef for Cython optimization
