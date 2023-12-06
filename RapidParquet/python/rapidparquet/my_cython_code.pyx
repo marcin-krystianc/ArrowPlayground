@@ -25,4 +25,4 @@ cdef void CReadMetadata(const char* path):
     crapid_parquet.ReadMetadata(path)
 
 def ReadMetadata(filename):
-    CReadMetadata(filename)
+    CReadMetadata(filename.encode('utf8'))
