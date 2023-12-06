@@ -5,7 +5,8 @@
 # cython: profile=False
 # cython: language_level = 3
 
-from cython.cimports import crapid_parquet
+# from cython.cimports import crapid_parquet
+cimport crapid_parquet
 
 # Declare the function signature with cdef for Cython optimization
 cdef int calculate_factorial(int n):
@@ -19,3 +20,9 @@ def factorial(int number):
     if number < 0:
         raise ValueError("Factorial is not defined for negative numbers")
     return calculate_factorial(number)
+
+cdef void CReadMetadata(const char* path):
+    crapid_parquet.ReadMetadata(path)
+
+def ReadMetadata(filename):
+    CReadMetadata(filename)
