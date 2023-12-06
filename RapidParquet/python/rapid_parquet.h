@@ -4,4 +4,4 @@
 
 int do_stuff();
 
-parquet::FileMetaData ReadMetadata(const char *filename);
+void ReadMetadata(const char *filename);

@@ -92,9 +92,7 @@ setup(
     install_requires=requires,
     license=about["__license__"],
     zip_safe=False,
-    ext_modules=cythonize(["rapidparquet/my_cython_code.pyx",
-                          Extension("queue", [],libraries=["arrow", "parquet"])
-    ]),
+    ext_modules=cythonize(["rapidparquet/my_cython_code.pyx"]),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",

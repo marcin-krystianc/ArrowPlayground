@@ -1,5 +1,9 @@
 # distutils: sources = rapid_parquet.cc
-# distutils: include_dirs = 
+# distutils: libraries = arrow parquet
+# distutils: include_dirs = .
+# distutils: language = c++
+# cython: profile=False
+# cython: language_level = 3
 
 from cython.cimports import crapid_parquet
 

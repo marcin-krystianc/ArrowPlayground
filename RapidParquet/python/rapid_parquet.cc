@@ -8,19 +8,19 @@
 
 #include "rapid_parquet.h"
 
+using arrow::Status;
+
 int do_stuff()
 {
     return 42;
 }
 
-parquet::FileMetaData ReadMetadata(const char *filename)
+void ReadMetadata(const char *filename)
 {
     std::shared_ptr<arrow::io::ReadableFile> infile;
-    ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
+    PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(filename)));
     auto metadata = parquet::ReadMetaData(infile);
-   
+
     std::vector<int> rows_groups = {0};
     auto metadata_subset = metadata->Subset(rows_groups);
-    
-    return metadata;
 }
