@@ -11,6 +11,8 @@ if __name__ == "__main__":
     libname = pathlib.Path().absolute() / "build/librapid_parquet.so"
     c_lib = ctypes.CDLL(libname)
 
+pq.core._parquet._reconstruct_filemetadata('fasdf')
+
 # result = c_lib.rapid_parquet.do_stuff()
 print ("hello world:")
 result = rp.my_add(2,3)
