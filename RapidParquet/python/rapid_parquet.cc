@@ -123,7 +123,7 @@ void GenerateRapidMetadata(const char *parquet_path, const char *index_file_path
     fs.close(); 
 }
 
-std::vector<uint8_t> ReadRowGroupMetadata(const char *index_file_path, int row_group)
+std::vector<char> ReadRowGroupMetadata(const char *index_file_path, int row_group)
 {
     // 1. Read metadata for a row group from the external file.
     std::ifstream fs(index_file_path, std::ios::binary);
@@ -146,7 +146,7 @@ std::vector<uint8_t> ReadRowGroupMetadata(const char *index_file_path, int row_g
     fs.read((char*)&length, sizeof(length));
     length = FROM_FILE_ENDIANESS(length);
     
-    std::vector<uint8_t> buffer (length);
+    std::vector<char> buffer (length);
     fs.seekg(offset, std::ios_base::beg);
     fs.read(&buffer[0], length);
     fs.close();

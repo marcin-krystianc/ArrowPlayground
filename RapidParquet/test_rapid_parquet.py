@@ -3,6 +3,8 @@ import ctypes
 import pathlib
 import rapidparquet as rp
 import pyarrow.parquet as pq
+import pyarrow.lib as pqlib
+import pyarrow as pa
 import polars as pl
 import numpy as np
 
@@ -11,15 +13,17 @@ if __name__ == "__main__":
     libname = pathlib.Path().absolute() / "build/librapid_parquet.so"
     c_lib = ctypes.CDLL(libname)
 
-pq.core._parquet._reconstruct_filemetadata('fasdf')
+buf = pa.allocate_buffer(5, resizable=True)
+
+
+# buffer = pqlib.Buffer('aaa')
+# pq.core._parquet._reconstruct_filemetadata('fasdf')
 
 # result = c_lib.rapid_parquet.do_stuff()
 print ("hello world:")
 result = rp.my_add(2,3)
 metada = rp.my_metadata('/workspace/tmp/my.parquet')
 result = rp.factorial(5)
-
-
 
 rows = 10
 columns = 100
@@ -32,5 +36,6 @@ table = pl.DataFrame(
 
 pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False)
 rp.ReadMetadata(path)
+rp.GenerateRapidMetadata(path, rp.GenerateRapidMetadata(path + '.rapid'))
 
 {}

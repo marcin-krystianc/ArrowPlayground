@@ -26,3 +26,9 @@ cdef void CReadMetadata(const char* path):
 
 def ReadMetadata(filename):
     CReadMetadata(filename.encode('utf8'))
+
+cdef void CGenerateRapidMetadata(const char* parquet_path, const char* index_file_path):
+    crapid_parquet.GenerateRapidMetadata(parquet_path, index_file_path)
+
+def GenerateRapidMetadata(parquet_path, index_file_path):
+    CGenerateRapidMetadata(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
