@@ -39,5 +39,6 @@ pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, wri
 rp.ReadMetadata(path)
 rapid_path = path + '.rapid'
 rp.GenerateRapidMetadata(path, rapid_path)
-metadata = rp.ReadRowGroupMetadata(path, 0)
+metadata = rp.ReadRowGroupMetadata(rapid_path, 0)
+print (metadata.row_groups)
 {}

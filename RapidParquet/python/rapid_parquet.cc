@@ -111,6 +111,8 @@ void GenerateRapidMetadata(const char *parquet_path, const char *index_file_path
     fs.seekp(offset0, std::ios_base::beg);
     for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
+         std::cerr << "writing, offset=" << offsets[row_group] << " at " << fs.tellp() << std::endl;
+
         fs.write((char *)& TO_FILE_ENDIANESS(offsets[row_group]), sizeof(offsets[row_group])); 
         fs.write((char *)& TO_FILE_ENDIANESS(lengths[row_group]), sizeof(lengths[row_group])); 
     }
@@ -122,6 +124,7 @@ std::vector<char> ReadRowGroupMetadata(const char *index_file_path, int row_grou
 {
     // 1. Read metadata for a row group from the external file.
     std::ifstream fs(index_file_path, std::ios::binary);
+    fs.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
     char header[4] = {};
     uint32_t row_groups;
     fs.read(&header[0], sizeof(header));
@@ -131,21 +134,35 @@ std::vector<char> ReadRowGroupMetadata(const char *index_file_path, int row_grou
     {
         throw std::runtime_error("row_group > row_groups");
     }
+ 
+    std::cerr << "Seeking, row_group=" << row_group << ", length=" << 2 * row_group * sizeof(uint32_t) << std::endl;
 
-    fs.seekg(2 * row_group * sizeof(uint32_t), std::ios_base::cur);
-
+    //fs.seekg(2 * row_group * sizeof(uint32_t), std::ios_base::cur);
+    
     uint32_t offset;    
     uint32_t length;
+    std::cerr << "Deserialising in cpp, offset=" << offset << ", length=" << length << std::endl;
+
     fs.read((char*)&offset, sizeof(offset));
+    std::cerr << "read" << std::endl;
+
     offset = FROM_FILE_ENDIANESS(offset);
     fs.read((char*)&length, sizeof(length));
     length = FROM_FILE_ENDIANESS(length);
-    
+     std::cerr << "Deserialising in cpp, offset=" << offset << ", length=" << length << std::endl;
+
     std::vector<char> buffer (length);
     fs.seekg(offset, std::ios_base::beg);
     fs.read(&buffer[0], length);
     fs.close();
 
+     std::cerr << "Deserialising in cpp, offset=" << offset << ", length=" << length << std::endl;
+
+    // 2. Deserialize the metadata
+    uint32_t read_metadata_len = length;
+    auto single_row_metadata = parquet::FileMetaData::Make(&buffer[0], &read_metadata_len);
+    
+    std::cerr << "Deserialised in cpp" << std::endl;
     // return arrow::Buffer::FromVector(buffer);    
     return buffer;
 }
