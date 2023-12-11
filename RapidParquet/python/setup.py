@@ -56,18 +56,6 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-# 'setup.py publish' shortcut.
-if sys.argv[-1] == "publish":
-    os.system("python setup.py sdist bdist_wheel")
-    os.system("twine upload dist/*")
-    sys.exit()
-
-requires = [
-    "pyarrow>=13",
-]
-test_requirements = [
-    # "pytest-httpbin==2.0.0",
-]
 
 about = {}
 here = os.path.abspath(os.path.dirname(__file__))
@@ -76,6 +64,16 @@ with open(os.path.join(here, "rapidparquet", "__version__.py"), "r", "utf-8") as
 
 with open("README.md", "r", "utf-8") as f:
     readme = f.read()
+
+# Define your extension
+extensions = [
+    Extension(
+        "rapidparquet.my_cython_code",
+        ["rapidparquet/my_cython_code.pyx"],
+        include_dirs = [pyarrow.get_include(), numpy.get_include()],  
+        library_dirs = pyarrow.get_library_dirs(),
+    )
+]
 
 setup(
     name=about["__title__"],
@@ -91,11 +89,12 @@ setup(
     package_dir={"": "."},
     include_package_data=True,
     python_requires=">=3.7",
-    install_requires=requires,
-    include_dirs = [pyarrow.get_include(), numpy.get_include()],
+    setup_requires="pyarrow>=10,",
+    install_requires="pyarrow>=10",
+    extras_require={"arrow": ["pyarrow>=7.0,<15"], "numpy": "numpy>=1.20.0"},
     license=about["__license__"],
     zip_safe=False,
-    ext_modules=cythonize(["rapidparquet/my_cython_code.pyx"]),    
+    ext_modules=cythonize(extensions),    
     project_urls={
         "Documentation": "https://github.com/marcin-krystianc/ArrowPlayground",
         "Source": "https://github.com/marcin-krystianc/ArrowPlayground"

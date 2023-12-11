@@ -1,5 +1,5 @@
 # distutils: sources = rapid_parquet.cc
-# distutils: libraries = arrow parquet
+# distutils: libraries = arrow_python
 # distutils: include_dirs = .
 # distutils: language = c++
 
