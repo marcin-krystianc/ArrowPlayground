@@ -13,7 +13,8 @@ if __name__ == "__main__":
     libname = pathlib.Path().absolute() / "build/librapid_parquet.so"
     c_lib = ctypes.CDLL(libname)
 
-buf = pa.allocate_buffer(5, resizable=True)
+# TODO (marcink) allocate_buffer
+# buf = pa.allocate_buffer(5, resizable=True)
 
 
 # buffer = pqlib.Buffer('aaa')
@@ -36,6 +37,7 @@ table = pl.DataFrame(
 
 pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False)
 rp.ReadMetadata(path)
-rp.GenerateRapidMetadata(path, rp.GenerateRapidMetadata(path + '.rapid'))
-
+rapid_path = path + '.rapid'
+rp.GenerateRapidMetadata(path, rapid_path)
+metadata = rp.ReadRowGroupMetadata(path, 0)
 {}

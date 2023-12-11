@@ -7,6 +7,8 @@ from setuptools import setup
 from distutils.extension import Extension
 from setuptools.command.test import test as TestCommand
 from Cython.Build import cythonize
+import pyarrow
+import numpy
 
 CURRENT_PYTHON = sys.version_info[:2]
 REQUIRED_PYTHON = (3, 7)
@@ -61,7 +63,7 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 requires = [
-    # "charset_normalizer>=2,<4",
+    "pyarrow>=13",
 ]
 test_requirements = [
     # "pytest-httpbin==2.0.0",
@@ -90,6 +92,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=requires,
+    include_dirs = [pyarrow.get_include(), numpy.get_include()],
     license=about["__license__"],
     zip_safe=False,
     ext_modules=cythonize(["rapidparquet/my_cython_code.pyx"]),

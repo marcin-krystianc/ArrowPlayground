@@ -16,11 +16,6 @@ using arrow::Status;
 #define TO_FILE_ENDIANESS(x) (x)
 #define FROM_FILE_ENDIANESS(x) (x)
 
-int do_stuff()
-{
-    return 42;
-}
-
 void ReadMetadata(const char *filename)
 {
     std::shared_ptr<arrow::io::ReadableFile> infile;
@@ -150,5 +145,7 @@ std::vector<char> ReadRowGroupMetadata(const char *index_file_path, int row_grou
     fs.seekg(offset, std::ios_base::beg);
     fs.read(&buffer[0], length);
     fs.close();
+
+    // return arrow::Buffer::FromVector(buffer);    
     return buffer;
 }
