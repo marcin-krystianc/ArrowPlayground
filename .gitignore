@@ -14,3 +14,6 @@ cmake_install.cmake
 /RapidParquet/python/rapidparquet/my_cython_code.cpython-310-x86_64-linux-gnu.so
 /RapidParquet/python/rapidparquet/my_cython_code.cpp
 /RapidParquet/my.parquet
+/ColumnReadingPerf/arrow_results.csv
+/ColumnReadingPerf/pyarrow_results.csv
+/RapidParquet/my.parquet.rapid

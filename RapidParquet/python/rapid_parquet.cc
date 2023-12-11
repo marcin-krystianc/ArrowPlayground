@@ -15,22 +15,9 @@ using arrow::Status;
 
 #define TO_FILE_ENDIANESS(x) (x)
 #define FROM_FILE_ENDIANESS(x) (x)
+const char* HEADER_V1 = "PQT1";
 
-void ReadMetadata(const char *filename)
-{
-    std::shared_ptr<arrow::io::ReadableFile> infile;
-    PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(filename)));
-    auto metadata = parquet::ReadMetaData(infile);
-
-    std::cerr << "num row groups=" << metadata->num_row_groups() << std::endl;
-
-    std::vector<int> rows_groups = {0};
-    auto metadata_subset = metadata->Subset(rows_groups);
-
-    std::cerr << "num row groups=" << metadata_subset->num_row_groups() << std::endl;
-}
-
-/* File format:
+/* File format: (Thrift-encoded metadata stored separately for each row group)
 --------------------------
 | 0 - 3 | PQT1           | File header in ASCI
 |------------------------|
@@ -63,19 +50,18 @@ void ReadMetadata(const char *filename)
 |   Row group [n-1]      | Thrift data
 --------------------------
 */
-void GenerateRapidMetadata(const char *parquet_path, const char *index_file_path)
-{
-    char header_bytes[] = {'P', 'Q', 'T', '1'};
 
+void GenerateRapidMetadata(const char *parquet_path, const char *rapid_file_path)
+{
     std::shared_ptr<arrow::io::ReadableFile> infile;
     PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(parquet_path)));
     auto metadata = parquet::ReadMetaData(infile);
 
-    std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);
-    fs.write(&header_bytes[0], sizeof(header_bytes));
+    std::ofstream fs(rapid_file_path, std::ios::out | std::ios::binary);
+    fs.write(&HEADER_V1[0], strlen(HEADER_V1));
 
     uint32_t row_groups = (metadata->num_row_groups());
-    fs.write((char *)& TO_FILE_ENDIANESS(row_groups), sizeof(row_groups));
+    fs.write((char *)&TO_FILE_ENDIANESS(row_groups), sizeof(row_groups));
 
     auto offset0 = fs.tellp();
 
@@ -83,14 +69,12 @@ void GenerateRapidMetadata(const char *parquet_path, const char *index_file_path
     for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
         uint32_t zero = 0;
-        fs.write((char *)& TO_FILE_ENDIANESS(zero), sizeof(zero)); 
-        fs.write((char *)& TO_FILE_ENDIANESS(zero), sizeof(zero)); 
+        fs.write((char *)&TO_FILE_ENDIANESS(zero), sizeof(zero));
+        fs.write((char *)&TO_FILE_ENDIANESS(zero), sizeof(zero));
     }
 
     std::vector<uint32_t> offsets;
-    std::vector<uint32_t> lengths;  
-
-    // uint32_t base_offset = sizeof(header_bytes) + sizeof(row_groups) + row_groups * (sizeof(uint32_t) + sizeof(uint32_t));
+    std::vector<uint32_t> lengths;
     uint32_t offset = fs.tellp();
     for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
@@ -102,67 +86,58 @@ void GenerateRapidMetadata(const char *parquet_path, const char *index_file_path
         std::shared_ptr<arrow::Buffer> thrift_buffer;
         PARQUET_ASSIGN_OR_THROW(thrift_buffer, stream.get()->Finish());
         uint32_t length = thrift_buffer.get()->size();
-        fs.write((const char*)thrift_buffer.get()->data(), length);
+        fs.write((const char *)thrift_buffer.get()->data(), length);
         offsets.push_back(offset);
         lengths.push_back(length);
         offset += length;
     }
 
+    // Now move the file poitner back and write offsets and lengths
     fs.seekp(offset0, std::ios_base::beg);
     for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
-         std::cerr << "writing, offset=" << offsets[row_group] << " at " << fs.tellp() << std::endl;
-
-        fs.write((char *)& TO_FILE_ENDIANESS(offsets[row_group]), sizeof(offsets[row_group])); 
-        fs.write((char *)& TO_FILE_ENDIANESS(lengths[row_group]), sizeof(lengths[row_group])); 
+        fs.write((char *)&TO_FILE_ENDIANESS(offsets[row_group]), sizeof(offsets[row_group]));
+        fs.write((char *)&TO_FILE_ENDIANESS(lengths[row_group]), sizeof(lengths[row_group]));
     }
-
-    fs.close(); 
 }
 
-std::vector<char> ReadRowGroupMetadata(const char *index_file_path, int row_group)
+std::vector<char> ReadRowGroupMetadata(const std::string& rapid_file_path, uint32_t row_group)
 {
-    // 1. Read metadata for a row group from the external file.
-    std::ifstream fs(index_file_path, std::ios::binary);
-    fs.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
-    char header[4] = {};
+    std::ifstream fs(rapid_file_path, std::ios::binary);
+    fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+    std::vector<char> header(strlen(HEADER_V1));
+    fs.read(&header[0], header.size());
+
+    if (memcmp(&HEADER_V1[0], &header[0], strlen(HEADER_V1)) != 0)
+    {
+        auto msg = std::string("File '") + rapid_file_path + "' has unexpected format!";
+        throw std::runtime_error(msg);
+    }
+    
     uint32_t row_groups;
-    fs.read(&header[0], sizeof(header));
-    fs.read((char*)&row_groups, sizeof(row_groups));
+    fs.read((char *)&row_groups, sizeof(row_groups));
     row_groups = FROM_FILE_ENDIANESS(row_groups);
     if (row_group >= row_groups)
     {
-        throw std::runtime_error("row_group > row_groups");
+        auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only " + std::to_string(row_groups) + " are available!";
+        throw std::runtime_error(msg);
     }
- 
-    std::cerr << "Seeking, row_group=" << row_group << ", length=" << 2 * row_group * sizeof(uint32_t) << std::endl;
 
-    //fs.seekg(2 * row_group * sizeof(uint32_t), std::ios_base::cur);
-    
-    uint32_t offset;    
-    uint32_t length;
-    std::cerr << "Deserialising in cpp, offset=" << offset << ", length=" << length << std::endl;
+    // Seek to the offset and length
+    fs.seekg(2 * row_group * sizeof(uint32_t), std::ios_base::cur);
 
-    fs.read((char*)&offset, sizeof(offset));
-    std::cerr << "read" << std::endl;
-
+    uint32_t offset;
+    fs.read((char *)&offset, sizeof(offset));
     offset = FROM_FILE_ENDIANESS(offset);
-    fs.read((char*)&length, sizeof(length));
-    length = FROM_FILE_ENDIANESS(length);
-     std::cerr << "Deserialising in cpp, offset=" << offset << ", length=" << length << std::endl;
 
-    std::vector<char> buffer (length);
+    uint32_t length;
+    fs.read((char *)&length, sizeof(length));
+    length = FROM_FILE_ENDIANESS(length);
+
+    std::vector<char> buffer(length);
     fs.seekg(offset, std::ios_base::beg);
     fs.read(&buffer[0], length);
-    fs.close();
 
-     std::cerr << "Deserialising in cpp, offset=" << offset << ", length=" << length << std::endl;
-
-    // 2. Deserialize the metadata
-    uint32_t read_metadata_len = length;
-    auto single_row_metadata = parquet::FileMetaData::Make(&buffer[0], &read_metadata_len);
-    
-    std::cerr << "Deserialised in cpp" << std::endl;
-    // return arrow::Buffer::FromVector(buffer);    
     return buffer;
 }
