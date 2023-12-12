@@ -75,6 +75,9 @@ extensions = [
     )
 ]
 
+# Make default named pyarrow shared libs available.
+pyarrow.create_library_symlinks()
+
 setup(
     name=about["__title__"],
     version=about["__version__"],
