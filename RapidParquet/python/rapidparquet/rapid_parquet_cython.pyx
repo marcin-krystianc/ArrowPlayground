@@ -5,7 +5,7 @@
 
 import pyarrow as pa
 import pyarrow.parquet as pq
-cimport crapid_parquet
+cimport rapidparquet.crapid_parquet
 from pyarrow.lib cimport Buffer
 
 def GenerateRapidMetadata(parquet_path, index_file_path):
