@@ -3,3 +3,4 @@
 /build
 __pycache__
 *.so
+rapid_parquet_marcin_krystianc.egg-info
