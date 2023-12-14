@@ -44,12 +44,10 @@
             "/usr/local/lib/python3.10/dist-packages/pyarrow-15.0.0.dev113+g862792132-py3.10-linux-x86_64.egg/pyarrow/include/arrow/util/iterator.h",
             "/usr/local/lib/python3.10/dist-packages/pyarrow-15.0.0.dev113+g862792132-py3.10-linux-x86_64.egg/pyarrow/include/arrow/util/key_value_metadata.h",
             "/usr/local/lib/python3.10/dist-packages/pyarrow-15.0.0.dev113+g862792132-py3.10-linux-x86_64.egg/pyarrow/include/arrow/util/thread_pool.h",
-            "/usr/local/lib/python3.10/dist-packages/pyarrow-15.0.0.dev113+g862792132-py3.10-linux-x86_64.egg/pyarrow/include/arrow/util/value_parsing.h",
-            "rapidparquet/rapid_parquet.h"
+            "/usr/local/lib/python3.10/dist-packages/pyarrow-15.0.0.dev113+g862792132-py3.10-linux-x86_64.egg/pyarrow/include/arrow/util/value_parsing.h"
         ],
         "include_dirs": [
             ".",
-            "rapidparquet",
             "/usr/local/lib/python3.10/dist-packages/pyarrow-15.0.0.dev113+g862792132-py3.10-linux-x86_64.egg/pyarrow/include",
             "/usr/local/lib/python3.10/dist-packages/numpy/core/include"
         ],
@@ -62,13 +60,13 @@
             "/usr/local/lib/python3.10/dist-packages/pyarrow-15.0.0.dev113+g862792132-py3.10-linux-x86_64.egg/pyarrow",
             "/usr/local/lib"
         ],
-        "name": "rapidparquet",
+        "name": "rapid_parquet_cython",
         "sources": [
             "rapidparquet/rapid_parquet_cython.pyx",
             "rapidparquet/rapid_parquet.cc"
         ]
     },
-    "module_name": "rapidparquet"
+    "module_name": "rapid_parquet_cython"
 }
 END: Cython Metadata */
 
@@ -1282,8 +1280,8 @@ static CYTHON_INLINE float __PYX_NAN() {
     #define __PYX_EXTERN_C extern "C++"
 #endif
 
-#define __PYX_HAVE__rapidparquet
-#define __PYX_HAVE_API__rapidparquet
+#define __PYX_HAVE__rapid_parquet_cython
+#define __PYX_HAVE_API__rapid_parquet_cython
 /* Early includes */
 #include "ios"
 #include "new"
@@ -5004,13 +5002,6 @@ static PyObject* __Pyx_PyObject_GenericGetAttr(PyObject* obj, PyObject* attr_nam
 #define __Pyx_PyObject_GenericGetAttr PyObject_GenericGetAttr
 #endif
 
-/* SetPackagePathFromImportLib.proto */
-#if PY_MAJOR_VERSION >= 3 && !CYTHON_PEP489_MULTI_PHASE_INIT
-static int __Pyx_SetPackagePathFromImportLib(PyObject *module_name);
-#else
-#define __Pyx_SetPackagePathFromImportLib(a) 0
-#endif
-
 /* IncludeStructmemberH.proto */
 #include <structmember.h>
 
@@ -5415,7 +5406,7 @@ static CYTHON_INLINE int __pyx_f_7cpython_8datetime_9timedelta_11microsecond_mic
 
 /* Module declarations from "libcpp.vector" */
 
-/* Module declarations from "rapidparquet.crapid_parquet" */
+/* Module declarations from "crapid_parquet" */
 
 /* Module declarations from "cpython.version" */
 
@@ -5560,7 +5551,7 @@ static std::shared_ptr< arrow::Tensor>  (*__pyx_f_7pyarrow_3lib_pyarrow_unwrap_t
 static std::shared_ptr< arrow::RecordBatch>  (*__pyx_f_7pyarrow_3lib_pyarrow_unwrap_batch)(PyObject *); /*proto*/
 static std::shared_ptr< arrow::Table>  (*__pyx_f_7pyarrow_3lib_pyarrow_unwrap_table)(PyObject *); /*proto*/
 
-/* Module declarations from "rapidparquet" */
+/* Module declarations from "rapid_parquet_cython" */
 static PyObject *__pyx_collections_abc_Sequence = 0;
 static PyObject *generic = 0;
 static PyObject *strided = 0;
@@ -5607,11 +5598,11 @@ static PyObject *__pyx_format_from_typeinfo(__Pyx_TypeInfo *); /*proto*/
 /* #### Code section: typeinfo ### */
 static __Pyx_TypeInfo __Pyx_TypeInfo_char = { "char", NULL, sizeof(char), { 0 }, 0, 'H', __PYX_IS_UNSIGNED(char), 0 };
 /* #### Code section: before_global_var ### */
-#define __Pyx_MODULE_NAME "rapidparquet"
-extern int __pyx_module_is_main_rapidparquet;
-int __pyx_module_is_main_rapidparquet = 0;
+#define __Pyx_MODULE_NAME "rapid_parquet_cython"
+extern int __pyx_module_is_main_rapid_parquet_cython;
+int __pyx_module_is_main_rapid_parquet_cython = 0;
 
-/* Implementation of "rapidparquet" */
+/* Implementation of "rapid_parquet_cython" */
 /* #### Code section: global_var ### */
 static PyObject *__pyx_builtin___import__;
 static PyObject *__pyx_builtin_ValueError;
@@ -5718,7 +5709,6 @@ static const char __pyx_k_initializing[] = "_initializing";
 static const char __pyx_k_is_coroutine[] = "_is_coroutine";
 static const char __pyx_k_parquet_path[] = "parquet_path";
 static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
-static const char __pyx_k_rapidparquet[] = "rapidparquet";
 static const char __pyx_k_stringsource[] = "<stringsource>";
 static const char __pyx_k_version_info[] = "version_info";
 static const char __pyx_k_class_getitem[] = "__class_getitem__";
@@ -5738,6 +5728,7 @@ static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_strided_and_direct[] = "<strided and direct>";
 static const char __pyx_k_ReadRowGroupMetadata[] = "ReadRowGroupMetadata";
+static const char __pyx_k_rapid_parquet_cython[] = "rapid_parquet_cython";
 static const char __pyx_k_strided_and_indirect[] = "<strided and indirect>";
 static const char __pyx_k_GenerateRapidMetadata[] = "GenerateRapidMetadata";
 static const char __pyx_k_Invalid_shape_in_axis[] = "Invalid shape in axis ";
@@ -5812,8 +5803,8 @@ static void __pyx_memoryviewslice___pyx_pf_15View_dot_MemoryView_16_memoryviewsl
 static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_15View_dot_MemoryView___pyx_unpickle_Enum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_pf_12rapidparquet_GenerateRapidMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_parquet_path, PyObject *__pyx_v_index_file_path); /* proto */
-static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_group); /* proto */
+static PyObject *__pyx_pf_20rapid_parquet_cython_GenerateRapidMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_parquet_path, PyObject *__pyx_v_index_file_path); /* proto */
+static PyObject *__pyx_pf_20rapid_parquet_cython_2ReadRowGroupMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_group); /* proto */
 static PyObject *__pyx_tp_new_array(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_Enum(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_memoryview(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -6181,8 +6172,7 @@ typedef struct {
   PyObject *__pyx_n_s_pyx_unpickle_Enum;
   PyObject *__pyx_n_s_pyx_vtable;
   PyObject *__pyx_n_s_range;
-  PyObject *__pyx_n_s_rapidparquet;
-  PyObject *__pyx_n_u_rapidparquet;
+  PyObject *__pyx_n_s_rapid_parquet_cython;
   PyObject *__pyx_kp_s_rapidparquet_rapid_parquet_cytho;
   PyObject *__pyx_n_s_reconstruct_filemetadata;
   PyObject *__pyx_n_s_reduce;
@@ -6497,8 +6487,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_pyx_unpickle_Enum);
   Py_CLEAR(clear_module_state->__pyx_n_s_pyx_vtable);
   Py_CLEAR(clear_module_state->__pyx_n_s_range);
-  Py_CLEAR(clear_module_state->__pyx_n_s_rapidparquet);
-  Py_CLEAR(clear_module_state->__pyx_n_u_rapidparquet);
+  Py_CLEAR(clear_module_state->__pyx_n_s_rapid_parquet_cython);
   Py_CLEAR(clear_module_state->__pyx_kp_s_rapidparquet_rapid_parquet_cytho);
   Py_CLEAR(clear_module_state->__pyx_n_s_reconstruct_filemetadata);
   Py_CLEAR(clear_module_state->__pyx_n_s_reduce);
@@ -6791,8 +6780,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_pyx_unpickle_Enum);
   Py_VISIT(traverse_module_state->__pyx_n_s_pyx_vtable);
   Py_VISIT(traverse_module_state->__pyx_n_s_range);
-  Py_VISIT(traverse_module_state->__pyx_n_s_rapidparquet);
-  Py_VISIT(traverse_module_state->__pyx_n_u_rapidparquet);
+  Py_VISIT(traverse_module_state->__pyx_n_s_rapid_parquet_cython);
   Py_VISIT(traverse_module_state->__pyx_kp_s_rapidparquet_rapid_parquet_cytho);
   Py_VISIT(traverse_module_state->__pyx_n_s_reconstruct_filemetadata);
   Py_VISIT(traverse_module_state->__pyx_n_s_reduce);
@@ -7213,8 +7201,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_pyx_unpickle_Enum __pyx_mstate_global->__pyx_n_s_pyx_unpickle_Enum
 #define __pyx_n_s_pyx_vtable __pyx_mstate_global->__pyx_n_s_pyx_vtable
 #define __pyx_n_s_range __pyx_mstate_global->__pyx_n_s_range
-#define __pyx_n_s_rapidparquet __pyx_mstate_global->__pyx_n_s_rapidparquet
-#define __pyx_n_u_rapidparquet __pyx_mstate_global->__pyx_n_u_rapidparquet
+#define __pyx_n_s_rapid_parquet_cython __pyx_mstate_global->__pyx_n_s_rapid_parquet_cython
 #define __pyx_kp_s_rapidparquet_rapid_parquet_cytho __pyx_mstate_global->__pyx_kp_s_rapidparquet_rapid_parquet_cytho
 #define __pyx_n_s_reconstruct_filemetadata __pyx_mstate_global->__pyx_n_s_reconstruct_filemetadata
 #define __pyx_n_s_reduce __pyx_mstate_global->__pyx_n_s_reduce
@@ -23720,7 +23707,7 @@ static CYTHON_INLINE PyObject *__pyx_f_7pyarrow_8includes_6common_PyObject_to_ob
   return __pyx_r;
 }
 
-/* "rapidparquet/rapid_parquet_cython.pyx":10
+/* "rapid_parquet_cython.pyx":10
  * from pyarrow.lib cimport Buffer
  * 
  * def GenerateRapidMetadata(parquet_path, index_file_path):             # <<<<<<<<<<<<<<
@@ -23729,16 +23716,16 @@ static CYTHON_INLINE PyObject *__pyx_f_7pyarrow_8includes_6common_PyObject_to_ob
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_12rapidparquet_1GenerateRapidMetadata(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_20rapid_parquet_cython_1GenerateRapidMetadata(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_12rapidparquet_GenerateRapidMetadata, "GenerateRapidMetadata(parquet_path, index_file_path)");
-static PyMethodDef __pyx_mdef_12rapidparquet_1GenerateRapidMetadata = {"GenerateRapidMetadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12rapidparquet_1GenerateRapidMetadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_12rapidparquet_GenerateRapidMetadata};
-static PyObject *__pyx_pw_12rapidparquet_1GenerateRapidMetadata(PyObject *__pyx_self, 
+PyDoc_STRVAR(__pyx_doc_20rapid_parquet_cython_GenerateRapidMetadata, "GenerateRapidMetadata(parquet_path, index_file_path)");
+static PyMethodDef __pyx_mdef_20rapid_parquet_cython_1GenerateRapidMetadata = {"GenerateRapidMetadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_20rapid_parquet_cython_1GenerateRapidMetadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_20rapid_parquet_cython_GenerateRapidMetadata};
+static PyObject *__pyx_pw_20rapid_parquet_cython_1GenerateRapidMetadata(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -23823,11 +23810,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("rapidparquet.GenerateRapidMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rapid_parquet_cython.GenerateRapidMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_12rapidparquet_GenerateRapidMetadata(__pyx_self, __pyx_v_parquet_path, __pyx_v_index_file_path);
+  __pyx_r = __pyx_pf_20rapid_parquet_cython_GenerateRapidMetadata(__pyx_self, __pyx_v_parquet_path, __pyx_v_index_file_path);
 
   /* function exit code */
   {
@@ -23840,7 +23827,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_12rapidparquet_GenerateRapidMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_parquet_path, PyObject *__pyx_v_index_file_path) {
+static PyObject *__pyx_pf_20rapid_parquet_cython_GenerateRapidMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_parquet_path, PyObject *__pyx_v_index_file_path) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -23855,7 +23842,7 @@ static PyObject *__pyx_pf_12rapidparquet_GenerateRapidMetadata(CYTHON_UNUSED PyO
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("GenerateRapidMetadata", 1);
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":11
+  /* "rapid_parquet_cython.pyx":11
  * 
  * def GenerateRapidMetadata(parquet_path, index_file_path):
  *     crapid_parquet.GenerateRapidMetadata(parquet_path.encode('utf8'), index_file_path.encode('utf8'))             # <<<<<<<<<<<<<<
@@ -23916,7 +23903,7 @@ static PyObject *__pyx_pf_12rapidparquet_GenerateRapidMetadata(CYTHON_UNUSED PyO
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":10
+  /* "rapid_parquet_cython.pyx":10
  * from pyarrow.lib cimport Buffer
  * 
  * def GenerateRapidMetadata(parquet_path, index_file_path):             # <<<<<<<<<<<<<<
@@ -23932,7 +23919,7 @@ static PyObject *__pyx_pf_12rapidparquet_GenerateRapidMetadata(CYTHON_UNUSED PyO
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_AddTraceback("rapidparquet.GenerateRapidMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rapid_parquet_cython.GenerateRapidMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -23940,7 +23927,7 @@ static PyObject *__pyx_pf_12rapidparquet_GenerateRapidMetadata(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "rapidparquet/rapid_parquet_cython.pyx":13
+/* "rapid_parquet_cython.pyx":13
  *     crapid_parquet.GenerateRapidMetadata(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
  * def ReadRowGroupMetadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
@@ -23949,16 +23936,16 @@ static PyObject *__pyx_pf_12rapidparquet_GenerateRapidMetadata(CYTHON_UNUSED PyO
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_12rapidparquet_3ReadRowGroupMetadata(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_20rapid_parquet_cython_3ReadRowGroupMetadata(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_12rapidparquet_2ReadRowGroupMetadata, "ReadRowGroupMetadata(index_file_path, row_group)");
-static PyMethodDef __pyx_mdef_12rapidparquet_3ReadRowGroupMetadata = {"ReadRowGroupMetadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_12rapidparquet_3ReadRowGroupMetadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_12rapidparquet_2ReadRowGroupMetadata};
-static PyObject *__pyx_pw_12rapidparquet_3ReadRowGroupMetadata(PyObject *__pyx_self, 
+PyDoc_STRVAR(__pyx_doc_20rapid_parquet_cython_2ReadRowGroupMetadata, "ReadRowGroupMetadata(index_file_path, row_group)");
+static PyMethodDef __pyx_mdef_20rapid_parquet_cython_3ReadRowGroupMetadata = {"ReadRowGroupMetadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_20rapid_parquet_cython_3ReadRowGroupMetadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_20rapid_parquet_cython_2ReadRowGroupMetadata};
+static PyObject *__pyx_pw_20rapid_parquet_cython_3ReadRowGroupMetadata(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -24043,11 +24030,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("rapidparquet.ReadRowGroupMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rapid_parquet_cython.ReadRowGroupMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_12rapidparquet_2ReadRowGroupMetadata(__pyx_self, __pyx_v_index_file_path, __pyx_v_row_group);
+  __pyx_r = __pyx_pf_20rapid_parquet_cython_2ReadRowGroupMetadata(__pyx_self, __pyx_v_index_file_path, __pyx_v_row_group);
 
   /* function exit code */
   {
@@ -24060,7 +24047,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_group) {
+static PyObject *__pyx_pf_20rapid_parquet_cython_2ReadRowGroupMetadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_group) {
   std::vector<char>  __pyx_v_v;
   __Pyx_memviewslice __pyx_v_mv = { 0, 0, { 0 }, { 0 }, { 0 } };
   struct __pyx_obj_7pyarrow_3lib_Buffer *__pyx_v_pyarrow_buffer = 0;
@@ -24080,7 +24067,7 @@ static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyO
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("ReadRowGroupMetadata", 1);
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":14
+  /* "rapid_parquet_cython.pyx":14
  * 
  * def ReadRowGroupMetadata(index_file_path, row_group):
  *     v = crapid_parquet.ReadRowGroupMetadata(index_file_path.encode('utf8'), row_group)             # <<<<<<<<<<<<<<
@@ -24116,7 +24103,7 @@ static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyO
   __pyx_v_v = ReadRowGroupMetadata(__pyx_t_5, __pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":15
+  /* "rapid_parquet_cython.pyx":15
  * def ReadRowGroupMetadata(index_file_path, row_group):
  *     v = crapid_parquet.ReadRowGroupMetadata(index_file_path.encode('utf8'), row_group)
  *     cdef char[::1] mv = <char[:v.size()]>&v[0]             # <<<<<<<<<<<<<<
@@ -24142,7 +24129,7 @@ static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyO
   __pyx_t_8.memview = NULL;
   __pyx_t_8.data = NULL;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":16
+  /* "rapid_parquet_cython.pyx":16
  *     v = crapid_parquet.ReadRowGroupMetadata(index_file_path.encode('utf8'), row_group)
  *     cdef char[::1] mv = <char[:v.size()]>&v[0]
  *     cdef Buffer pyarrow_buffer = pa.py_buffer(mv)             # <<<<<<<<<<<<<<
@@ -24182,7 +24169,7 @@ static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyO
   __pyx_v_pyarrow_buffer = ((struct __pyx_obj_7pyarrow_3lib_Buffer *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":17
+  /* "rapid_parquet_cython.pyx":17
  *     cdef char[::1] mv = <char[:v.size()]>&v[0]
  *     cdef Buffer pyarrow_buffer = pa.py_buffer(mv)
  *     return pq.core._parquet._reconstruct_filemetadata(pyarrow_buffer)             # <<<<<<<<<<<<<<
@@ -24225,7 +24212,7 @@ static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyO
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":13
+  /* "rapid_parquet_cython.pyx":13
  *     crapid_parquet.GenerateRapidMetadata(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
  * def ReadRowGroupMetadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
@@ -24241,7 +24228,7 @@ static PyObject *__pyx_pf_12rapidparquet_2ReadRowGroupMetadata(CYTHON_UNUSED PyO
   __Pyx_XDECREF((PyObject *)__pyx_t_7);
   __PYX_XCLEAR_MEMVIEW(&__pyx_t_8, 1);
   __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_AddTraceback("rapidparquet.ReadRowGroupMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("rapid_parquet_cython.ReadRowGroupMetadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XCLEAR_MEMVIEW(&__pyx_v_mv, 1);
@@ -24388,7 +24375,7 @@ static PyType_Slot __pyx_type___pyx_array_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_array_spec = {
-  "rapidparquet.array",
+  "rapid_parquet_cython.array",
   sizeof(struct __pyx_array_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_SEQUENCE,
@@ -24434,7 +24421,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rapidparquet.""array", /*tp_name*/
+  "rapid_parquet_cython.""array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -24594,7 +24581,7 @@ static PyType_Slot __pyx_type___pyx_MemviewEnum_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_MemviewEnum_spec = {
-  "rapidparquet.Enum",
+  "rapid_parquet_cython.Enum",
   sizeof(struct __pyx_MemviewEnum_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
@@ -24604,7 +24591,7 @@ static PyType_Spec __pyx_type___pyx_MemviewEnum_spec = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rapidparquet.""Enum", /*tp_name*/
+  "rapid_parquet_cython.""Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -24901,7 +24888,7 @@ static PyType_Slot __pyx_type___pyx_memoryview_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_memoryview_spec = {
-  "rapidparquet.memoryview",
+  "rapid_parquet_cython.memoryview",
   sizeof(struct __pyx_memoryview_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
@@ -24947,7 +24934,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rapidparquet.""memoryview", /*tp_name*/
+  "rapid_parquet_cython.""memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -25101,7 +25088,7 @@ static PyType_Slot __pyx_type___pyx_memoryviewslice_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_memoryviewslice_spec = {
-  "rapidparquet._memoryviewslice",
+  "rapid_parquet_cython._memoryviewslice",
   sizeof(struct __pyx_memoryviewslice_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_SEQUENCE,
@@ -25111,7 +25098,7 @@ static PyType_Spec __pyx_type___pyx_memoryviewslice_spec = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "rapidparquet.""_memoryviewslice", /*tp_name*/
+  "rapid_parquet_cython.""_memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -25332,8 +25319,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_pyx_unpickle_Enum, __pyx_k_pyx_unpickle_Enum, sizeof(__pyx_k_pyx_unpickle_Enum), 0, 0, 1, 1},
     {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
     {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
-    {&__pyx_n_s_rapidparquet, __pyx_k_rapidparquet, sizeof(__pyx_k_rapidparquet), 0, 0, 1, 1},
-    {&__pyx_n_u_rapidparquet, __pyx_k_rapidparquet, sizeof(__pyx_k_rapidparquet), 0, 1, 0, 1},
+    {&__pyx_n_s_rapid_parquet_cython, __pyx_k_rapid_parquet_cython, sizeof(__pyx_k_rapid_parquet_cython), 0, 0, 1, 1},
     {&__pyx_kp_s_rapidparquet_rapid_parquet_cytho, __pyx_k_rapidparquet_rapid_parquet_cytho, sizeof(__pyx_k_rapidparquet_rapid_parquet_cytho), 0, 0, 1, 0},
     {&__pyx_n_s_reconstruct_filemetadata, __pyx_k_reconstruct_filemetadata, sizeof(__pyx_k_reconstruct_filemetadata), 0, 0, 1, 1},
     {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
@@ -25538,18 +25524,18 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__25);
   __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__25, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 1, __pyx_L1_error)
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":6
+  /* "rapid_parquet_cython.pyx":6
  * 
  * import pyarrow as pa
  * import pyarrow.parquet as pq             # <<<<<<<<<<<<<<
- * cimport rapidparquet.crapid_parquet
+ * cimport crapid_parquet
  * from pyarrow.lib cimport Buffer
  */
   __pyx_tuple__27 = PyTuple_Pack(2, __pyx_n_s_pyarrow, __pyx_n_s_parquet_2); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(1, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__27);
   __Pyx_GIVEREF(__pyx_tuple__27);
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":10
+  /* "rapid_parquet_cython.pyx":10
  * from pyarrow.lib cimport Buffer
  * 
  * def GenerateRapidMetadata(parquet_path, index_file_path):             # <<<<<<<<<<<<<<
@@ -25561,7 +25547,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__28);
   __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_rapidparquet_rapid_parquet_cytho, __pyx_n_s_GenerateRapidMetadata, 10, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(1, 10, __pyx_L1_error)
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":13
+  /* "rapid_parquet_cython.pyx":13
  *     crapid_parquet.GenerateRapidMetadata(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
  * def ReadRowGroupMetadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
@@ -26024,10 +26010,10 @@ static int __Pyx_modinit_function_import_code(void) {
 #if PY_MAJOR_VERSION >= 3
 #if CYTHON_PEP489_MULTI_PHASE_INIT
 static PyObject* __pyx_pymod_create(PyObject *spec, PyModuleDef *def); /*proto*/
-static int __pyx_pymod_exec_rapidparquet(PyObject* module); /*proto*/
+static int __pyx_pymod_exec_rapid_parquet_cython(PyObject* module); /*proto*/
 static PyModuleDef_Slot __pyx_moduledef_slots[] = {
   {Py_mod_create, (void*)__pyx_pymod_create},
-  {Py_mod_exec, (void*)__pyx_pymod_exec_rapidparquet},
+  {Py_mod_exec, (void*)__pyx_pymod_exec_rapid_parquet_cython},
   {0, NULL}
 };
 #endif
@@ -26040,7 +26026,7 @@ namespace {
   #endif
   {
       PyModuleDef_HEAD_INIT,
-      "rapidparquet",
+      "rapid_parquet_cython",
       0, /* m_doc */
     #if CYTHON_PEP489_MULTI_PHASE_INIT
       0, /* m_size */
@@ -26088,17 +26074,11 @@ namespace {
 
 
 #if PY_MAJOR_VERSION < 3
-__Pyx_PyMODINIT_FUNC initrapidparquet(void) CYTHON_SMALL_CODE; /*proto*/
-#if !defined(CYTHON_NO_PYINIT_EXPORT) && (defined(_WIN32) || defined(WIN32) || defined(MS_WINDOWS))
-__Pyx_PyMODINIT_FUNC init__init__(void) { initrapidparquet(); }
-#endif
-__Pyx_PyMODINIT_FUNC initrapidparquet(void)
+__Pyx_PyMODINIT_FUNC initrapid_parquet_cython(void) CYTHON_SMALL_CODE; /*proto*/
+__Pyx_PyMODINIT_FUNC initrapid_parquet_cython(void)
 #else
-__Pyx_PyMODINIT_FUNC PyInit_rapidparquet(void) CYTHON_SMALL_CODE; /*proto*/
-#if !defined(CYTHON_NO_PYINIT_EXPORT) && (defined(_WIN32) || defined(WIN32) || defined(MS_WINDOWS))
-__Pyx_PyMODINIT_FUNC PyInit___init__(void) { return PyInit_rapidparquet(); }
-#endif
-__Pyx_PyMODINIT_FUNC PyInit_rapidparquet(void)
+__Pyx_PyMODINIT_FUNC PyInit_rapid_parquet_cython(void) CYTHON_SMALL_CODE; /*proto*/
+__Pyx_PyMODINIT_FUNC PyInit_rapid_parquet_cython(void)
 #if CYTHON_PEP489_MULTI_PHASE_INIT
 {
   return PyModuleDef_Init(&__pyx_moduledef);
@@ -26179,7 +26159,7 @@ bad:
 }
 
 
-static CYTHON_SMALL_CODE int __pyx_pymod_exec_rapidparquet(PyObject *__pyx_pyinit_module)
+static CYTHON_SMALL_CODE int __pyx_pymod_exec_rapid_parquet_cython(PyObject *__pyx_pyinit_module)
 #endif
 #endif
 {
@@ -26202,7 +26182,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_rapidparquet(PyObject *__pyx_pyini
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   if (__pyx_m) {
     if (__pyx_m == __pyx_pyinit_module) return 0;
-    PyErr_SetString(PyExc_RuntimeError, "Module 'rapidparquet' has already been imported. Re-initialisation is not supported.");
+    PyErr_SetString(PyExc_RuntimeError, "Module 'rapid_parquet_cython' has already been imported. Re-initialisation is not supported.");
     return -1;
   }
   #elif PY_MAJOR_VERSION >= 3
@@ -26214,13 +26194,13 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_rapidparquet(PyObject *__pyx_pyini
   Py_INCREF(__pyx_m);
   #else
   #if PY_MAJOR_VERSION < 3
-  __pyx_m = Py_InitModule4("rapidparquet", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
+  __pyx_m = Py_InitModule4("rapid_parquet_cython", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
   if (unlikely(!__pyx_m)) __PYX_ERR(1, 1, __pyx_L1_error)
   #elif CYTHON_USE_MODULE_STATE
   __pyx_t_1 = PyModule_Create(&__pyx_moduledef); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 1, __pyx_L1_error)
   {
     int add_module_result = PyState_AddModule(__pyx_t_1, &__pyx_moduledef);
-    __pyx_t_1 = 0; /* transfer ownership from __pyx_t_1 to rapidparquet pseudovariable */
+    __pyx_t_1 = 0; /* transfer ownership from __pyx_t_1 to rapid_parquet_cython pseudovariable */
     if (unlikely((add_module_result < 0))) __PYX_ERR(1, 1, __pyx_L1_error)
     pystate_addmodule_run = 1;
   }
@@ -26244,7 +26224,7 @@ if (!__Pyx_RefNanny) {
       Py_FatalError("failed to import 'refnanny' module");
 }
 #endif
-  __Pyx_RefNannySetupContext("__Pyx_PyMODINIT_FUNC PyInit_rapidparquet(void)", 0);
+  __Pyx_RefNannySetupContext("__Pyx_PyMODINIT_FUNC PyInit_rapid_parquet_cython(void)", 0);
   if (__Pyx_check_binary_version(__PYX_LIMITED_VERSION_HEX, __Pyx_get_runtime_version(), CYTHON_COMPILING_IN_LIMITED_API) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #ifdef __Pxy_PyFrame_Initialize_Offsets
   __Pxy_PyFrame_Initialize_Offsets();
@@ -26282,17 +26262,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_rapidparquet) {
+  if (__pyx_module_is_main_rapid_parquet_cython) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name_2, __pyx_n_s_main) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
-  }
-  if (!CYTHON_PEP489_MULTI_PHASE_INIT) {
-    if (unlikely((__Pyx_SetPackagePathFromImportLib(__pyx_n_u_rapidparquet) < 0))) __PYX_ERR(1, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(1, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "rapidparquet")) {
-      if (unlikely((PyDict_SetItemString(modules, "rapidparquet", __pyx_m) < 0))) __PYX_ERR(1, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "rapid_parquet_cython")) {
+      if (unlikely((PyDict_SetItemString(modules, "rapid_parquet_cython", __pyx_m) < 0))) __PYX_ERR(1, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -26826,23 +26803,23 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_7) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":5
+  /* "rapid_parquet_cython.pyx":5
  * # distutils: language = c++
  * 
  * import pyarrow as pa             # <<<<<<<<<<<<<<
  * import pyarrow.parquet as pq
- * cimport rapidparquet.crapid_parquet
+ * cimport crapid_parquet
  */
   __pyx_t_7 = __Pyx_ImportDottedModule(__pyx_n_s_pyarrow, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pa, __pyx_t_7) < 0) __PYX_ERR(1, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":6
+  /* "rapid_parquet_cython.pyx":6
  * 
  * import pyarrow as pa
  * import pyarrow.parquet as pq             # <<<<<<<<<<<<<<
- * cimport rapidparquet.crapid_parquet
+ * cimport crapid_parquet
  * from pyarrow.lib cimport Buffer
  */
   __pyx_t_7 = __Pyx_ImportDottedModule(__pyx_n_s_pyarrow_parquet, __pyx_tuple__27); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 6, __pyx_L1_error)
@@ -26850,31 +26827,31 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pq, __pyx_t_7) < 0) __PYX_ERR(1, 6, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":10
+  /* "rapid_parquet_cython.pyx":10
  * from pyarrow.lib cimport Buffer
  * 
  * def GenerateRapidMetadata(parquet_path, index_file_path):             # <<<<<<<<<<<<<<
  *     crapid_parquet.GenerateRapidMetadata(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_12rapidparquet_1GenerateRapidMetadata, 0, __pyx_n_s_GenerateRapidMetadata, NULL, __pyx_n_s_rapidparquet, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 10, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_20rapid_parquet_cython_1GenerateRapidMetadata, 0, __pyx_n_s_GenerateRapidMetadata, NULL, __pyx_n_s_rapid_parquet_cython, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_GenerateRapidMetadata, __pyx_t_7) < 0) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":13
+  /* "rapid_parquet_cython.pyx":13
  *     crapid_parquet.GenerateRapidMetadata(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
  * def ReadRowGroupMetadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
  *     v = crapid_parquet.ReadRowGroupMetadata(index_file_path.encode('utf8'), row_group)
  *     cdef char[::1] mv = <char[:v.size()]>&v[0]
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_12rapidparquet_3ReadRowGroupMetadata, 0, __pyx_n_s_ReadRowGroupMetadata, NULL, __pyx_n_s_rapidparquet, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 13, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_20rapid_parquet_cython_3ReadRowGroupMetadata, 0, __pyx_n_s_ReadRowGroupMetadata, NULL, __pyx_n_s_rapid_parquet_cython, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 13, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_ReadRowGroupMetadata, __pyx_t_7) < 0) __PYX_ERR(1, 13, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "rapidparquet/rapid_parquet_cython.pyx":1
+  /* "rapid_parquet_cython.pyx":1
  * # distutils: libraries = arrow parquet             # <<<<<<<<<<<<<<
  * # distutils: include_dirs = .
  * # distutils: language = c++
@@ -26893,7 +26870,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_7);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
-      __Pyx_AddTraceback("init rapidparquet", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init rapid_parquet_cython", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     #if !CYTHON_USE_MODULE_STATE
     Py_CLEAR(__pyx_m);
@@ -26907,7 +26884,7 @@ if (!__Pyx_RefNanny) {
     }
     #endif
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init rapidparquet");
+    PyErr_SetString(PyExc_ImportError, "init rapid_parquet_cython");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -29643,57 +29620,6 @@ static PyObject* __Pyx_PyObject_GenericGetAttr(PyObject* obj, PyObject* attr_nam
         return PyObject_GenericGetAttr(obj, attr_name);
     }
     return __Pyx_PyObject_GenericGetAttrNoDict(obj, attr_name);
-}
-#endif
-
-/* SetPackagePathFromImportLib */
-#if PY_MAJOR_VERSION >= 3 && !CYTHON_PEP489_MULTI_PHASE_INIT
-static int __Pyx_SetPackagePathFromImportLib(PyObject *module_name) {
-    PyObject *importlib, *osmod, *ossep, *parts, *package_path;
-    PyObject *file_path = NULL;
-    int result;
-    PyObject *spec;
-    importlib = PyImport_ImportModule("importlib.util");
-    if (unlikely(!importlib))
-        goto bad;
-    spec = PyObject_CallMethod(importlib, "find_spec", "(O)", module_name);
-    Py_DECREF(importlib);
-    if (unlikely(!spec))
-        goto bad;
-    file_path = PyObject_GetAttrString(spec, "origin");
-    Py_DECREF(spec);
-    if (unlikely(!file_path))
-        goto bad;
-    if (unlikely(PyObject_SetAttrString(__pyx_m, "__file__", file_path) < 0))
-        goto bad;
-    osmod = PyImport_ImportModule("os");
-    if (unlikely(!osmod))
-        goto bad;
-    ossep = PyObject_GetAttrString(osmod, "sep");
-    Py_DECREF(osmod);
-    if (unlikely(!ossep))
-        goto bad;
-    parts = PyObject_CallMethod(file_path, "rsplit", "(Oi)", ossep, 1);
-    Py_DECREF(file_path); file_path = NULL;
-    Py_DECREF(ossep);
-    if (unlikely(!parts))
-        goto bad;
-    package_path = Py_BuildValue("[O]", PyList_GET_ITEM(parts, 0));
-    Py_DECREF(parts);
-    if (unlikely(!package_path))
-        goto bad;
-    goto set_path;
-bad:
-    PyErr_WriteUnraisable(module_name);
-    Py_XDECREF(file_path);
-    PyErr_Clear();
-    package_path = PyList_New(0);
-    if (unlikely(!package_path))
-        return -1;
-set_path:
-    result = PyObject_SetAttrString(__pyx_m, "__path__", package_path);
-    Py_DECREF(package_path);
-    return result;
 }
 #endif
 

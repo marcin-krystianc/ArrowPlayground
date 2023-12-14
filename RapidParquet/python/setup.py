@@ -59,7 +59,7 @@ with open("README.md", "r", "utf-8") as f:
 
 # Define your extension
 extensions = [
-    Extension( "rapid_parquet_cython", ["rapidparquet/rapid_parquet_cython.pyx", "rapidparquet/rapid_parquet.cc"],
+    Extension( "rapidparquet.rapid_parquet_cython", ["rapidparquet/rapid_parquet_cython.pyx", "rapidparquet/rapid_parquet.cc"],
         include_dirs = [pyarrow.get_include(), numpy.get_include()],  
         library_dirs = pyarrow.get_library_dirs()
     )
@@ -86,6 +86,8 @@ setup(
     author=about["__author__"],
     author_email=about["__author_email__"],
     url=about["__url__"],
+    packages=["rapidparquet"],
+    package_dir={"": "."},
     include_package_data=False,
     python_requires=">=3.7",
     setup_requires=["pyarrow>=10","cython>=3"],
