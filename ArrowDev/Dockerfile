@@ -141,7 +141,7 @@ RUN apt-get clean && \
 
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 ENV ARROW_TEST_DATA=/src/arrow/testing/data
-ENV PARQUET_TEST_DATA=/src/arrow/submodules/parquet-testing/data
+ENV PARQUET_TEST_DATA=/src/arrow/cpp/submodules/parquet-testing/data
 
 RUN pip3 install jupyterlab polars parquet-tools build
 
@@ -151,5 +151,6 @@ RUN git clone https://github.com/adamreeve/parquet-inspect.git && \
 	python -m build  && \
 	pip install --editable .
 
+WORKDIR /src/arrow/cpp/build
 # Command to keep the container running
 CMD ["bash"]
