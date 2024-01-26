@@ -51,10 +51,11 @@ RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
-RUN git clone https://github.com/apache/arrow.git && \
+RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
-	git fetch --all
+	git fetch --all && \
+	git checkout --recurse-submodules apache-arrow-15.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
