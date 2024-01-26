@@ -138,7 +138,11 @@ RUN rm -rf /src/arrow/python/build
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+ENV ARROW_TEST_DATA=/src/arrow/testing/data
+ENV PARQUET_TEST_DATA=/src/arrow/submodules/parquet-testing/data
+
 RUN pip3 install jupyterlab polars parquet-tools build
 
 WORKDIR /src
