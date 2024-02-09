@@ -1,3 +1,4 @@
+
 #include "arrow/api.h"
 #include "arrow/io/api.h"
 #include "arrow/result.h"
@@ -16,7 +17,10 @@
 #include <iomanip>
 #include <unistd.h>
 
+
 using arrow::Status;
+
+Status ReadMetadata_CustomThrift(const std::string &filename);
 
 namespace
 {
@@ -34,6 +38,8 @@ namespace
   };
 
   const char *FILE_NAME = "/mnt/ramfs/my_ramfs.parquet";
+  const char *FILE_NAME_METADATA = "/mnt/ramfs/my_ramfs.metadata";
+
   // const char *FILE_NAME = "/tmp/my.parquet";
 
   std::shared_ptr<arrow::Schema> GetSchema(size_t nColumns)
@@ -173,7 +179,7 @@ namespace
     *dt = *dt1 + *dt2;
     return Status::OK();
   }
-  
+
   Status ReadRwoGroupWithRowSubsetMetadata(const std::string &filename, int row_group, std::vector<int> column_indicies, std::chrono::microseconds *dt, std::chrono::microseconds *dt1, std::chrono::microseconds *dt2)
   {
     auto index_file_name = filename + " .index";
@@ -194,7 +200,7 @@ namespace
       ARROW_ASSIGN_OR_RAISE(thrift_buffer, stream.get()->Finish());
 
       std::ofstream index_file(index_file_name, std::ios::binary);
-      index_file.write((const char*)thrift_buffer.get()->data(), thrift_buffer.get()->size());
+      index_file.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
       index_file.close();
     }
 
@@ -204,13 +210,13 @@ namespace
     std::unique_ptr<parquet::arrow::FileReader> reader;
     {
       auto begin = std::chrono::steady_clock::now();
-  
+
       // 1. Read metadata for a row group from the external file.
       std::ifstream index_file(index_file_name, std::ios::binary);
       index_file.seekg(0, std::ios::end);
       size_t index_file_length = index_file.tellg();
       index_file.seekg(0, std::ios::beg);
-      std::vector<char> buffer (index_file_length);
+      std::vector<char> buffer(index_file_length);
       index_file.read(&buffer[0], index_file_length);
       index_file.close();
 
@@ -225,7 +231,7 @@ namespace
       parquet::arrow::FileReaderBuilder fileReaderBuilder;
       fileReaderBuilder.properties(arrowReaderProperties);
 
-      // 3. Open the file using metadata for a row group  
+      // 3. Open the file using metadata for a row group
       ARROW_RETURN_NOT_OK(fileReaderBuilder.OpenFile(filename, false, readerProperties, single_row_metadata));
       ARROW_ASSIGN_OR_RAISE(reader, fileReaderBuilder.Build());
 
@@ -236,7 +242,7 @@ namespace
     ///////////////////////////////////////////////////////////////////////////
     // DT1 End
     ///////////////////////////////////////////////////////////////////////////
-   
+
     ///////////////////////////////////////////////////////////////////////////
     // DT2 Begin
     ///////////////////////////////////////////////////////////////////////////
@@ -253,7 +259,7 @@ namespace
     // DT2 End
     ///////////////////////////////////////////////////////////////////////////
 
-    *dt = *dt1 + *dt2;    
+    *dt = *dt1 + *dt2;
     return Status::OK();
   }
 
@@ -303,27 +309,20 @@ namespace
     }
   }
 
-  Status ReadMetadata(const std::string &filename)
+  Status GenerateMetadata(const std::string &filename, const std::string &metadata_filename)
   {
-    std::list<std::shared_ptr<parquet::FileMetaData>> list;
-    for (int i = 0; i < 10000; i++)
-    {
-      std::shared_ptr<arrow::io::ReadableFile> infile;
-      ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
-      auto metadata = parquet::ReadMetaData(infile);
-      std::cerr << "Metadata columns: " << metadata->num_columns() << " rows: " << metadata->num_rows() << " row_groups: " << metadata->num_row_groups() << std::endl;
-
-      std::vector<int> rows_groups = {0};
-      auto metadata_subset = metadata->Subset(rows_groups);
-      std::cerr << "metadata_subset columns: " << metadata_subset->num_columns() << " rows: " << metadata_subset->num_rows() << " row_groups: " << metadata_subset->num_row_groups() << std::endl;
-
-      // auto impl = metadata->impl_.get();
-      // auto format = metadata->GetFormat();
-
-      // list.push_back(metadata);
-      std::cerr << i << std::endl;
-    }
-
+    std::shared_ptr<arrow::io::ReadableFile> infile;
+    ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
+    auto metadata = parquet::ReadMetaData(infile);
+    std::shared_ptr<arrow::io::BufferOutputStream> stream;
+    PARQUET_ASSIGN_OR_THROW(stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
+    metadata.get()->WriteTo(stream.get());
+    std::shared_ptr<arrow::Buffer> thrift_buffer;
+    PARQUET_ASSIGN_OR_THROW(thrift_buffer, stream.get()->Finish());
+    uint32_t length = thrift_buffer.get()->size();
+    std::ofstream fs(metadata_filename, std::ios::out | std::ios::binary);
+    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+    fs.write((const char *)thrift_buffer.get()->data(), length);
     return Status::OK();
   }
 
@@ -437,16 +436,194 @@ namespace
 
     return Status::OK();
   }
+
+  std::vector<char> ReadFile (const std::string &filename)
+  {
+      auto begin = std::chrono::steady_clock::now();
+      std::ifstream fs(filename, std::ios::in | std::ios::binary);
+      fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+      fs.seekg(0, std::ios::end);
+      size_t length = fs.tellg();
+      fs.seekg(0, std::ios::beg);
+      std::vector<char> buffer(length);
+      fs.read(&buffer[0], length);
+      return buffer;
+  }
+
+  Status ReadMetadata(const std::string &filename)
+  {
+    for (int i = 0; i < 5; i++)
+    {
+      auto begin = std::chrono::steady_clock::now();
+      std::shared_ptr<arrow::io::ReadableFile> infile;
+      ARROW_ASSIGN_OR_RAISE(infile, arrow::io::ReadableFile::Open(filename));
+      auto metadata = parquet::ReadMetaData(infile);
+      auto end = std::chrono::steady_clock::now();
+      auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+      std::cerr << metadata.get()->num_rows() << ", " << metadata.get()->num_row_groups() << " Reading Metadata:" << dt.count() << std::endl;
+    }
+
+    std::cerr << std::endl;
+    return Status::OK();
+  }
+
+  Status ReadMetadata_thrift(const std::string &filename)
+  {
+    for (int i = 0; i < 500; i++)
+    {     
+      auto buffer = ReadFile(filename);
+      uint32_t len = buffer.size();
+      
+      auto begin = std::chrono::steady_clock::now();
+      auto metadata = parquet::FileMetaData::Make(&buffer[0], &len);
+      auto end = std::chrono::steady_clock::now();
+      auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+      std::cerr << metadata.get()->num_rows() << ", " << metadata.get()->num_row_groups() << " ReadMetadata_thrift: " << dt.count() << "ms" << std::endl;
+
+      auto readerProperties = parquet::default_reader_properties();
+      auto arrowReaderProperties = parquet::default_arrow_reader_properties();
+
+      std::unique_ptr<parquet::arrow::FileReader> reader;
+      parquet::arrow::FileReaderBuilder fileReaderBuilder;
+      fileReaderBuilder.properties(arrowReaderProperties);
+
+      // 3. Open the file using metadata for a row group
+      ARROW_RETURN_NOT_OK(fileReaderBuilder.OpenFile(FILE_NAME, false, readerProperties, metadata));
+      ARROW_ASSIGN_OR_RAISE(reader, fileReaderBuilder.Build());
+
+      std::shared_ptr<arrow::Table> parquet_table;
+
+      // Read the table.
+      /*
+      ARROW_RETURN_NOT_OK(reader->ReadRowGroup(0, &parquet_table));
+      auto nColumns = parquet_table->columns().size();
+      std::cerr << nColumns  << std::endl;
+
+      auto column0 = parquet_table->column(0);
+      std::cerr << column0->length()  << std::endl;
+      */
+      {}
+    }
+  
+    std::cerr << std::endl;
+    return Status::OK();
+  }
+  
+
+  Status ReadMetadata_baseline(const std::string &filename)
+  {
+    for (int i = 0; i < 5; i++)
+    {
+      auto buffer = ReadFile(filename);
+      uint32_t length = buffer.size();
+      auto begin = std::chrono::steady_clock::now();
+
+      int result = 0;
+      for (size_t i = 0; i < length; i++)
+      {
+        // Do some operations on data
+        if (buffer[i] > 5 && buffer[i] < 17)
+        {
+          result++;
+        }
+        
+        if (buffer[i] >> 3 == 6)
+        {
+          result++;
+        }
+      }
+
+      auto end = std::chrono::steady_clock::now();
+      auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+      std::cerr << result << " ReadMetadata_baseline: " << dt.count() << "ms"  << std::endl;
+    }
+
+    std::cerr << std::endl;
+    return Status::OK();
+  }
+
+  Status ReadMetadata4(const std::string &filename)
+  {
+    for (int i = 0; i < 5; i++)
+    {
+      auto buffer = ReadFile(filename);
+      uint32_t length = buffer.size();
+      auto begin = std::chrono::steady_clock::now();
+
+      int result = 0;
+      uint8_t byte;
+      for (size_t i = 0; i < length; i++)
+      {
+        memcpy((void *)&byte, &buffer[i], 1);
+
+        if (byte > 5 && byte < 17)
+        {
+          result++;
+        }
+
+        if (byte >> 3 == 6)
+        {
+          result++;
+        }
+      }
+
+      auto end = std::chrono::steady_clock::now();
+      auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+      std::cerr << result << " Reading Metadata4:" << dt.count() << std::endl;
+    }
+
+    std::cerr << std::endl;
+    return Status::OK();
+  }
 } // namespace
 
 void DoSOmething()
 {
   sleep(1);
-  for(int i=0; i< 100; i++)
+  for (int i = 0; i < 100; i++)
   {
     std::cerr << " writing file" << std::endl;
   }
 }
+
+class TBase {
+public:
+  virtual ~TBase() = default;
+  virtual uint32_t read();
+  virtual uint32_t write();
+};
+
+class MyClassA : TBase
+{
+  public:
+  uint32_t memberA0;
+  uint32_t memberA1;
+  uint32_t memberA2;
+  uint32_t memberA3;
+};
+
+class MyClassB0 : TBase
+{
+  public:
+  uint64_t memberB;
+};
+
+class MyClassB1 : TBase
+{
+  public:
+  uint64_t memberB;
+  // std::vector<int> path_in_schema; // 24 bytes
+  // std::string path; // 32 bytes
+  std::unique_ptr<int> unique_ptr; // 8 bytes
+};
+
+typedef struct _RowGroup__isset {
+  _RowGroup__isset() : sorting_columns(false), file_offset(false), total_compressed_size(false), ordinal(false) {}
+  bool sorting_columns :1;
+  bool file_offset :1;
+  bool total_compressed_size :1;
+  bool ordinal :1;
+} _RowGroup__isset;
 
 int main(int argc, char **argv)
 {
@@ -463,15 +640,33 @@ int main(int argc, char **argv)
   auto a2 = m2->GetValue();
   auto a3 = m3->GetValue();
   */
-  
-  
+
+  std::cerr << "sizeof(MyClassA)=" << sizeof(MyClassA) << std::endl;
+  std::cerr << "sizeof(MyClassB0)=" << sizeof(MyClassB0) << std::endl;
+  std::cerr << "sizeof(MyClassB1)=" << sizeof(MyClassB1) << std::endl;
+  std::cerr << "sizeof(_RowGroup__isset)=" << sizeof(_RowGroup__isset) << std::endl;
+
   if (!std::filesystem::exists(FILE_NAME))
   {
-    std::cerr << " writing file (wait what?" << std::endl;
+    std::cerr << " writing file" << std::endl;
     std::chrono::microseconds writing_dt;
-    WriteTableToParquet(1000, 100, FILE_NAME, &writing_dt, 1);
+    WriteTableToParquet(10000, 100, FILE_NAME, &writing_dt, 1);
+
+    std::cerr << " GenerateMetadata" << std::endl;
+    GenerateMetadata(FILE_NAME, FILE_NAME_METADATA);
   }
+
+  std::cerr << " ReadMetadata_CustomThrift" << std::endl;
+  ReadMetadata_CustomThrift(FILE_NAME_METADATA);
+
+  std::cerr << " ReadMetadata_thrift" << std::endl;
+  ReadMetadata_thrift(FILE_NAME_METADATA);
+    
+  ReadMetadata_baseline(FILE_NAME_METADATA);
+  /*
   ReadMetadata(FILE_NAME);
+  ReadMetadata4(FILE_NAME_METADATA);
+  */
 
   /*
   std::cerr << " writing file" << std::endl;

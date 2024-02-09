@@ -13,5 +13,5 @@ message(STATUS "Arrow SO version: ${ARROW_FULL_SO_VERSION}")
 message(STATUS "Parquet version: ${PARQUET_VERSION}")
 message(STATUS "Parquet SO version: ${PARQUET_FULL_SO_VERSION}")
 
-add_executable(arrow_benchmarks arrow_benchmarks.cc)
-target_link_libraries(arrow_benchmarks PRIVATE Arrow::arrow_shared ArrowDataset::arrow_dataset_shared Parquet::parquet_shared)
+add_executable(arrow_benchmarks arrow_benchmarks.cc arrow_benchmarks2.cc my_metadata_parser.cc parquet_types.cpp)
+target_link_libraries(arrow_benchmarks PRIVATE Arrow::arrow_shared ArrowDataset::arrow_dataset_shared Parquet::parquet_shared thrift::thrift)
