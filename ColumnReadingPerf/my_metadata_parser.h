@@ -6,7 +6,7 @@
 
 #include "parquet_types.h"
 
-parquet::FileMetaData DeserializeFileMetadata(const void* buf, uint32_t len);
+my_parquet::FileMetaData DeserializeFileMetadata(const void* buf, uint32_t len);
 
 
 #endif

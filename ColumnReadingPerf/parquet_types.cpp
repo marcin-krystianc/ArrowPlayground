@@ -11,7 +11,7 @@
 
 #include <thrift/TToString.h>
 
-namespace parquet {
+namespace my_parquet {
 
 int _kTypeValues[] = {
   Type::BOOLEAN,
@@ -6903,6 +6903,8 @@ uint32_t FileMetaData::read(::apache::thrift::protocol::TProtocol* iprot) {
   ::apache::thrift::protocol::TType ftype;
   int16_t fid;
 
+  gParserData = {};
+
   xfer += iprot->readStructBegin(fname);
 
   using ::apache::thrift::protocol::TProtocolException;
@@ -6934,13 +6936,17 @@ uint32_t FileMetaData::read(::apache::thrift::protocol::TProtocol* iprot) {
             this->schema.clear();
             uint32_t _size219;
             ::apache::thrift::protocol::TType _etype222;
+            gParserData.schema_list_offset = xfer;
             xfer += iprot->readListBegin(_etype222, _size219);
+            gParserData.schema_list_length = xfer - gParserData.schema_list_offset;
             this->schema.resize(_size219);
             uint32_t _i223;
             for (_i223 = 0; _i223 < _size219; ++_i223)
-            {
+            {              
+              gParserData.schema_elements.push_back(xfer);
               xfer += this->schema[_i223].read(iprot);
             }
+            gParserData.schema_elements.push_back(xfer);
             xfer += iprot->readListEnd();
           }
           isset_schema = true;

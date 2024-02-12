@@ -52,9 +52,9 @@ void DeserializeUnencryptedMessage(const uint8_t* buf, uint32_t* len,
     *len = *len - bytes_left;
   }
   
-parquet::FileMetaData DeserializeFileMetadata(const void* buf, uint32_t len)
+my_parquet::FileMetaData DeserializeFileMetadata(const void* buf, uint32_t len)
 {
-    parquet::FileMetaData fileMetaData;
+    my_parquet::FileMetaData fileMetaData;
     DeserializeUnencryptedMessage ((const uint8_t*)buf, &len, &fileMetaData);
     return fileMetaData;
 }

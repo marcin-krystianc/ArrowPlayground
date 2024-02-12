@@ -18,8 +18,23 @@
 #include <functional>
 #include <memory>
 
+struct ParserData 
+{
+  uint32_t schema_list_offset;
+  uint32_t schema_list_length;
+  uint32_t row_groups_list_offset;
+  uint32_t row_groups_list_length;
+  uint32_t column_orders_list_offset;
+  uint32_t column_orders_list_length;
+  std::vector<uint32_t> schema_elements;
+  std::vector<uint32_t> column_ordes;
+  std::vector<uint32_t> row_groups; // rg+1
+  std::vector<uint32_t> column_chunks; // rg * (c+1)
+};
 
-namespace parquet {
+inline ParserData gParserData = {};
+
+namespace my_parquet {
 
 /**
  * Types supported by Parquet.  These types are intended to be used in combination
