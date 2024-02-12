@@ -51,7 +51,7 @@ void DeserializeUnencryptedMessage(const uint8_t* buf, uint32_t* len,
     uint32_t bytes_left = tmem_transport->available_read();
     *len = *len - bytes_left;
   }
-  
+
 my_parquet::FileMetaData DeserializeFileMetadata(const void* buf, uint32_t len)
 {
     my_parquet::FileMetaData fileMetaData;

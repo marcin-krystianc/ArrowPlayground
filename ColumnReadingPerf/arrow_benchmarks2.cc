@@ -37,7 +37,7 @@ arrow::Status ReadMetadata_CustomThrift(const std::string &filename)
     auto begin = std::chrono::steady_clock::now();
     auto metadata = DeserializeFileMetadata((const void*)&buffer[0], len);
     auto end = std::chrono::steady_clock::now();
-
+    auto parserData = gParserData;
     auto rows = metadata.num_rows;
     auto row_groups = metadata.row_groups;
 

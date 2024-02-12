@@ -650,7 +650,7 @@ int main(int argc, char **argv)
   {
     std::cerr << " writing file" << std::endl;
     std::chrono::microseconds writing_dt;
-    WriteTableToParquet(10000, 100, FILE_NAME, &writing_dt, 1);
+    WriteTableToParquet(20, 7, FILE_NAME, &writing_dt, 1);
 
     std::cerr << " GenerateMetadata" << std::endl;
     GenerateMetadata(FILE_NAME, FILE_NAME_METADATA);

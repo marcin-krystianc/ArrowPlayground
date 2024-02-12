@@ -20,15 +20,16 @@
 
 struct ParserData 
 {
-  uint32_t schema_list_offset;
-  uint32_t schema_list_length;
-  uint32_t row_groups_list_offset;
-  uint32_t row_groups_list_length;
-  uint32_t column_orders_list_offset;
-  uint32_t column_orders_list_length;
-  std::vector<uint32_t> schema_elements;
-  std::vector<uint32_t> column_ordes;
-  std::vector<uint32_t> row_groups; // rg+1
+  std::vector<uint32_t> schema_list_offsets; // 1 + 1
+  std::vector<uint32_t> schema_elements; // (c + 1)
+
+  std::vector<uint32_t> row_groups_list_offsets; // 1 + 1
+  std::vector<uint32_t> row_groups; // rg + 1
+
+  std::vector<uint32_t> column_orders_list_offsets; // 1 + 1
+  std::vector<uint32_t> column_ordes; // (c + 1)
+
+  std::vector<uint32_t> column_chunks_list_offsets; // rg * (1 + 1)
   std::vector<uint32_t> column_chunks; // rg * (c+1)
 };
 

@@ -5582,13 +5582,17 @@ uint32_t RowGroup::read(::apache::thrift::protocol::TProtocol* iprot) {
             this->columns.clear();
             uint32_t _size140;
             ::apache::thrift::protocol::TType _etype143;
+            gParserData.column_chunks_list_offsets.push_back(xfer);
             xfer += iprot->readListBegin(_etype143, _size140);
+            gParserData.column_chunks_list_offsets.push_back(xfer);
             this->columns.resize(_size140);
             uint32_t _i144;
             for (_i144 = 0; _i144 < _size140; ++_i144)
-            {
+            {              
+              gParserData.column_chunks.push_back(xfer);
               xfer += this->columns[_i144].read(iprot);
             }
+            gParserData.column_chunks.push_back(xfer);
             xfer += iprot->readListEnd();
           }
           isset_columns = true;
@@ -6936,14 +6940,14 @@ uint32_t FileMetaData::read(::apache::thrift::protocol::TProtocol* iprot) {
             this->schema.clear();
             uint32_t _size219;
             ::apache::thrift::protocol::TType _etype222;
-            gParserData.schema_list_offset = xfer;
+            gParserData.schema_list_offsets.push_back(xfer);
             xfer += iprot->readListBegin(_etype222, _size219);
-            gParserData.schema_list_length = xfer - gParserData.schema_list_offset;
+            gParserData.schema_list_offsets.push_back(xfer);
             this->schema.resize(_size219);
             uint32_t _i223;
             for (_i223 = 0; _i223 < _size219; ++_i223)
-            {              
-              gParserData.schema_elements.push_back(xfer);
+            {
+              if (_i223 > 0) gParserData.schema_elements.push_back(xfer);
               xfer += this->schema[_i223].read(iprot);
             }
             gParserData.schema_elements.push_back(xfer);
@@ -6968,13 +6972,17 @@ uint32_t FileMetaData::read(::apache::thrift::protocol::TProtocol* iprot) {
             this->row_groups.clear();
             uint32_t _size224;
             ::apache::thrift::protocol::TType _etype227;
+            gParserData.row_groups_list_offsets.push_back(xfer);
             xfer += iprot->readListBegin(_etype227, _size224);
+            gParserData.row_groups_list_offsets.push_back(xfer);
             this->row_groups.resize(_size224);
             uint32_t _i228;
             for (_i228 = 0; _i228 < _size224; ++_i228)
             {
+              gParserData.row_groups.push_back(xfer);
               xfer += this->row_groups[_i228].read(iprot);
             }
+            gParserData.row_groups.push_back(xfer);
             xfer += iprot->readListEnd();
           }
           isset_row_groups = true;
@@ -7016,13 +7024,17 @@ uint32_t FileMetaData::read(::apache::thrift::protocol::TProtocol* iprot) {
             this->column_orders.clear();
             uint32_t _size234;
             ::apache::thrift::protocol::TType _etype237;
+            gParserData.column_orders_list_offsets.push_back(xfer);
             xfer += iprot->readListBegin(_etype237, _size234);
+            gParserData.column_orders_list_offsets.push_back(xfer);
             this->column_orders.resize(_size234);
             uint32_t _i238;
             for (_i238 = 0; _i238 < _size234; ++_i238)
             {
+              gParserData.column_ordes.push_back(xfer);
               xfer += this->column_orders[_i238].read(iprot);
             }
+            gParserData.column_ordes.push_back(xfer);
             xfer += iprot->readListEnd();
           }
           this->__isset.column_orders = true;
