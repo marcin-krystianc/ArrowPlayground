@@ -26,11 +26,11 @@ struct ParserData
   std::vector<uint32_t> row_groups_list_offsets; // 1 + 1
   std::vector<uint32_t> row_groups; // rg + 1
 
-  std::vector<uint32_t> column_orders_list_offsets; // 1 + 1
-  std::vector<uint32_t> column_ordes; // (c + 1)
-
   std::vector<uint32_t> column_chunks_list_offsets; // rg * (1 + 1)
   std::vector<uint32_t> column_chunks; // rg * (c+1)
+
+  std::vector<uint32_t> column_orders_list_offsets; // 1 + 1
+  std::vector<uint32_t> column_ordes; // (c + 1)
 };
 
 inline ParserData gParserData = {};
