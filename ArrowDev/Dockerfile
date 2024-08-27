@@ -27,27 +27,27 @@ RUN apt-get update && \
 	make \
 
 	# perf
-	xz-utils \
-    flex \
-    bison \
-    libelf-dev \
-    systemtap-sdt-dev \
-    libslang2-dev \
-    libcap-dev \
-    libperl-dev \
-    libpfm4-dev \
-    libnuma-dev \
-    libtraceevent-dev \
+	# xz-utils \
+    # flex \
+    # bison \
+    # libelf-dev \
+    # systemtap-sdt-dev \
+    # libslang2-dev \
+    # libcap-dev \
+    # libperl-dev \
+    # libpfm4-dev \
+    # libnuma-dev \
+    # libtraceevent-dev \
     
 	#Clean apt cache
 	&& rm -rf /var/lib/apt/lists/* \	
 	&& echo
 
-WORKDIR /
-RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
-    tar -xf ./linux-6.4.16.tar.xz && \
-    cd linux-6.4.16/tools/perf/ && \
-    make -C . && make install
+# WORKDIR /
+# RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
+#     tar -xf ./linux-6.4.16.tar.xz && \
+#     cd linux-6.4.16/tools/perf/ && \
+#     make -C . && make install
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
@@ -55,13 +55,14 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-15.0.0
+	git checkout --recurse-submodules apache-arrow-17.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
 RUN mkdir build && cd build && \
     cmake .. \
 	-DARROW_PARQUET=ON \
+    -DPARQUET_BUILD_EXECUTABLES=ON \
     -DPARQUET_REQUIRE_ENCRYPTION=ON \
     -DARROW_DATASET=ON \
     -DARROW_ACERO=ON \
@@ -99,7 +100,7 @@ RUN mkdir build && cd build && \
     -DARROW_PROTOBUF_USE_SHARED=ON \
     -DARROW_RE2_LINKAGE=static \
     -DARROW_RUNTIME_SIMD_LEVEL=MAX \
-    -DARROW_S3=OFF \
+    -DARROW_S3=ON \
     -DARROW_SIMD_LEVEL=DEFAULT \
     -DARROW_SNAPPY_USE_SHARED=ON \
     -DARROW_SUBSTRAIT=ON \
@@ -128,8 +129,10 @@ RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
 
 # Build Arrow Python
 WORKDIR /src/arrow/python
-RUN python setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet && \
-    python setup.py install
+RUN pip3 install cython && \
+    pip3 install jupyterlab polars parquet-tools build && \
+    python3 setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet && \
+    python3 setup.py install
 
 # Cleanup Arrow Python build artifacts
 RUN rm -rf /src/arrow/python/build
@@ -141,13 +144,11 @@ RUN apt-get clean && \
 
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 
-RUN pip3 install jupyterlab polars parquet-tools build
-
 WORKDIR /src
 RUN git clone https://github.com/adamreeve/parquet-inspect.git && \
     cd parquet-inspect && \
-	python -m build  && \
-	pip install --editable .
+	python3 -m build  && \
+	pip3 install --editable .
 
 WORKDIR /src/arrow/cpp/build
 ENV ARROW_TEST_DATA=/src/arrow/testing/data

@@ -63,13 +63,14 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-15.0.0
+	git checkout --recurse-submodules apache-arrow-17.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
 RUN mkdir build && cd build && \
     cmake .. \
 	-DARROW_PARQUET=ON \
+    -DPARQUET_BUILD_EXECUTABLES=ON \
     -DPARQUET_REQUIRE_ENCRYPTION=ON \
     -DARROW_DATASET=ON \
     -DARROW_ACERO=ON \
@@ -107,7 +108,7 @@ RUN mkdir build && cd build && \
     -DARROW_PROTOBUF_USE_SHARED=ON \
     -DARROW_RE2_LINKAGE=static \
     -DARROW_RUNTIME_SIMD_LEVEL=MAX \
-    -DARROW_S3=OFF \
+    -DARROW_S3=ON \
     -DARROW_SIMD_LEVEL=DEFAULT \
     -DARROW_SNAPPY_USE_SHARED=ON \
     -DARROW_SUBSTRAIT=ON \
@@ -133,8 +134,10 @@ RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
 
 # Build Arrow Python
 WORKDIR /src/arrow/python
-RUN python setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet --build-type=Debug && \
-    python setup.py install
+RUN pip3 install cython && \
+    pip3 install jupyterlab polars parquet-tools build && \
+    python3 setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet --build-type=Debug && \
+    python3 setup.py install
 
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 RUN pip3 install jupyterlab polars parquet-tools build
@@ -142,7 +145,7 @@ RUN pip3 install jupyterlab polars parquet-tools build
 WORKDIR /src
 RUN git clone https://github.com/adamreeve/parquet-inspect.git && \
     cd parquet-inspect && \
-	python -m build  && \
+	python3 -m build  && \
 	pip install --editable .
 
 WORKDIR /src/arrow/cpp/build
