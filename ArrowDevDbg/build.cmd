@@ -1,1 +1,1 @@
-docker build -t arrow-dev-dbg .
+docker build -t arrow-dev-dbg . --progress plain
