@@ -55,7 +55,7 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-17.0.0
+	git checkout --recurse-submodules apache-arrow-18.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp

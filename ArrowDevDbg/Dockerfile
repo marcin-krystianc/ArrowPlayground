@@ -25,7 +25,6 @@ RUN apt-get update && \
 	binutils \
 	linux-tools-generic \
 	valgrind \
-
 	# perf
 	xz-utils \
     flex \
@@ -38,14 +37,13 @@ RUN apt-get update && \
     libpfm4-dev \
     libnuma-dev \
     libtraceevent-dev \
-	
-	# other-tools
-	ninja-build \
-	build-essential \
-	net-tools \
-	gdb \	
-	python3-dev \
-	python3-dbg \
+    # other-tools
+    ninja-build \
+    build-essential \
+    net-tools \
+    gdb \
+    python3-dev \
+    python3-dbg \
 #Clean apt cache
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
@@ -63,7 +61,7 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-17.0.0
+	git checkout --recurse-submodules apache-arrow-18.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
