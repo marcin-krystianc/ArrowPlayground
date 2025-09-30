@@ -25,6 +25,7 @@ RUN apt-get update && \
 	linux-tools-generic \
 	valgrind \
 	make \
+	liburing-dev \
 
 	# perf
 	# xz-utils \
@@ -55,7 +56,7 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-18.0.0
+	git checkout --recurse-submodules apache-arrow-21.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
@@ -130,6 +131,7 @@ RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
 # Build Arrow Python
 WORKDIR /src/arrow/python
 RUN pip3 install cython && \
+	pip3 install --upgrade pip && \
     pip3 install jupyterlab polars parquet-tools build && \
     python3 setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet && \
     python3 setup.py install

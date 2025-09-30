@@ -4,7 +4,9 @@ FROM apache/arrow-dev:amd64-ubuntu-22.04-python-3
 ENV PYARROW_WITH_PARQUET=1 \
     PYARROW_WITH_DATASET=1 \
     PYARROW_WITH_PARQUET_ENCRYPTION=1 \
-	PYARROW_BUILD_TYPE=Debug
+	PYARROW_BUILD_TYPE=Debug \
+	PYARROW_BUNDLE_CYTHON_CPP=1 \
+	PYARROW_BUNDLE_ARROW_CPP=1 
 
 # Install necessary dependencies
 RUN apt-get update && \
@@ -44,6 +46,7 @@ RUN apt-get update && \
     gdb \
     python3-dev \
     python3-dbg \
+	liburing-dev \
 #Clean apt cache
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
@@ -61,7 +64,8 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-18.0.0
+#    git checkout --recurse-submodules 587b3fcad5ae4524411714c80a1479ff9a435508
+ git checkout --recurse-submodules apache-arrow-21.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
@@ -133,9 +137,9 @@ RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
 # Build Arrow Python
 WORKDIR /src/arrow/python
 RUN pip3 install cython && \
+    pip3 install --upgrade pip && \
     pip3 install jupyterlab polars parquet-tools build && \
-    python3 setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet --build-type=Debug && \
-    python3 setup.py install
+    pip3 install . -v
 
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 RUN pip3 install jupyterlab polars parquet-tools build
