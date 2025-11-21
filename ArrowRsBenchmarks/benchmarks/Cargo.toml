@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# Add arrow-rs and its parquet feature
+parquet = { version = "57.0.0", features = ["async", "arrow"] }
+tokio = { version = "1.0", features = ["full"] } # For async operations
