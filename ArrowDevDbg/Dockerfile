@@ -65,7 +65,7 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
 #    git checkout --recurse-submodules 587b3fcad5ae4524411714c80a1479ff9a435508
- git checkout --recurse-submodules apache-arrow-21.0.0
+ git checkout --recurse-submodules apache-arrow-22.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
@@ -128,6 +128,7 @@ RUN mkdir build && cd build && \
     -DARROW_WITH_ZLIB=ON \
     -DARROW_WITH_ZSTD=ON \
     -DARROW_ZSTD_USE_SHARED=ON \
+	-DARROW_WITH_OPENTELEMETRY=ON \
     -GNinja && \
     ninja install
 

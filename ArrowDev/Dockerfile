@@ -28,27 +28,27 @@ RUN apt-get update && \
 	liburing-dev \
 
 	# perf
-	# xz-utils \
-    # flex \
-    # bison \
-    # libelf-dev \
-    # systemtap-sdt-dev \
-    # libslang2-dev \
-    # libcap-dev \
-    # libperl-dev \
-    # libpfm4-dev \
-    # libnuma-dev \
-    # libtraceevent-dev \
+	xz-utils \
+    flex \
+    bison \
+    libelf-dev \
+    systemtap-sdt-dev \
+    libslang2-dev \
+    libcap-dev \
+    libperl-dev \
+    libpfm4-dev \
+    libnuma-dev \
+    libtraceevent-dev \
     
 	#Clean apt cache
 	&& rm -rf /var/lib/apt/lists/* \	
 	&& echo
 
-# WORKDIR /
-# RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
-#     tar -xf ./linux-6.4.16.tar.xz && \
-#     cd linux-6.4.16/tools/perf/ && \
-#     make -C . && make install
+WORKDIR /
+RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
+    tar -xf ./linux-6.4.16.tar.xz && \
+    cd linux-6.4.16/tools/perf/ && \
+    make -C . && make install
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
@@ -56,7 +56,7 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-21.0.0
+	git checkout --recurse-submodules apache-arrow-22.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
@@ -123,7 +123,7 @@ RUN mkdir build && cd build && \
     ninja install
 
 # Cleanup Arrow C++ build directory
-RUN rm -rf /src/arrow/cpp/build
+# RUN rm -rf /src/arrow/cpp/build
 
 # Remove any previous version of Arrow Python package
 RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
