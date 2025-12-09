@@ -2,12 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
+      <LangVersion>13</LangVersion>
   </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Apache.Arrow" Version="21.0.0" />
         <PackageReference Include="ParquetSharp" Version="21.0.0" />
+        <PackageReference Include="Spectre.Console" Version="0.44.0" />
         <PackageReference Include="CommunityToolkit.HighPerformance" Version="7.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     </ItemGroup>
 </Project>
