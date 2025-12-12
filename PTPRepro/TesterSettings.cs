@@ -10,6 +10,11 @@ public class TesterSettings : CommandSettings
     [DefaultValue("myparquet.path")]
     public string Path { get; set; }
 
+    [CommandOption("--write-parquet")]
+    [Description("Write arrow record batches to parquet files")]
+    [DefaultValue(true)]
+    public bool WriteParquet { get; set; }
+
     [CommandOption("--columns")]
     [Description("Number of columns")]
     [DefaultValue((int)100)]
@@ -34,4 +39,9 @@ public class TesterSettings : CommandSettings
     [Description("Number of rows in a file")]
     [DefaultValue((long)1_00_000_000_000)]
     public long FileRows { get; set; }
+
+    [CommandOption("--exit-after")]
+    [Description("Exit after this number of seconds")]
+    [DefaultValue((long)1_000)]
+    public long ExitAfter { get; set; }
 }

@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,8 +44,14 @@ public class Tester : AsyncCommand<TesterSettings>
 
         foreach (var recordBatch in recordBatches)
         {
-            Interlocked.Add(ref n_written_rows_file, recordBatch.Length);
-            _parquet_writer.WriteRecordBatch(useClones ? recordBatch.Clone() : recordBatch);
+            var recordBatchToWrite = useClones ? recordBatch.Clone() : recordBatch;
+            if (settings.WriteParquet)
+            {
+                Interlocked.Add(ref n_written_rows_file, recordBatch.Length);
+                _parquet_writer.WriteRecordBatch(recordBatchToWrite);
+            }
+
+            recordBatchToWrite.Dispose();
         }
     }
 
@@ -55,7 +62,7 @@ public class Tester : AsyncCommand<TesterSettings>
         for (int i = 0; i < settings.NumberOfBatches; i++)
         {
             List<IArrowArray> data = new List<IArrowArray>();
-            int rows = Convert.ToInt32(settings.BatchRows * rnd.NextDouble() + 1);
+            int rows = rnd.Next(Convert.ToInt32(0.99 * settings.BatchRows), settings.BatchRows + 1);
             for (var c = 0; c < settings.Columns; c++)
             {
                 int startIndex = rnd.Next(0, RandomData.Length - settings.BatchRows + 1);
@@ -92,17 +99,24 @@ public class Tester : AsyncCommand<TesterSettings>
             .Select(i => new Field($"C{i}", FloatType.Default, nullable: false))
             .ToList();
 
+        var sw = Stopwatch.StartNew();
         var schema = new Schema(fields, []);
-
-        for (int i = 0; i < 10; i++)
+        var remainingBatches = new List<RecordBatch>();
+        while (sw.Elapsed.TotalSeconds < settings.ExitAfter)
         {
-            var batches = GenerateBatches(settings, schema);
-            WriteRecordBatches(settings, schema, batches, true);
-            WriteRecordBatches(settings, schema, batches, false);
+            var batches = GenerateBatches(settings, schema)
+                .Concat(remainingBatches)
+                .ToList();
+
+            remainingBatches = batches.OrderBy(_ => rnd.Next()) // random shuffle
+                .Take(batches.Count / 2)
+                .ToList();
+
+            WriteRecordBatches(settings, schema, remainingBatches, true);
+            WriteRecordBatches(settings, schema, batches.Except(remainingBatches), false);
         }
 
         Console.WriteLine("Hello, World!");
-
         await Task.Delay(0);
         return 0;
     }
