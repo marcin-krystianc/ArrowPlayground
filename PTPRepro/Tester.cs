@@ -50,8 +50,6 @@ public class Tester : AsyncCommand<TesterSettings>
                 Interlocked.Add(ref n_written_rows_file, recordBatch.Length);
                 _parquet_writer.WriteRecordBatch(recordBatchToWrite);
             }
-
-            recordBatchToWrite.Dispose();
         }
     }
 
