@@ -1,7 +1,7 @@
 # Example
 ```
-dotnet run -c Release --framework net6.0 --project /workspace/ArrowPlayground/PTPRepro/ -- test \ 
---batch-rows=6500000 \ 
+dotnet run -c Release --framework net6.0 --project /workspace/ArrowPlayground/PTPRepro/ -- test \
+--batch-rows=6500000 \
 --number-of-batches=23 \
 --write-parquet=true \
 --path=/tmp/my.parquet \
