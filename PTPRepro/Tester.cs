@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace PTPRepro;
 public class Tester : AsyncCommand<TesterSettings>
 {
     private const int NRandRows = 50_000_000;
-        
+    private readonly IArrowType[] COLUMN_TYPES = { FloatType.Default, StringType.Default, HalfFloatType.Default, };
     private static float[] RandomData = new float[NRandRows];
     private long n_written_rows_file = 0;
     private FileWriter _parquet_writer = null;
@@ -61,19 +62,52 @@ public class Tester : AsyncCommand<TesterSettings>
         {
             List<IArrowArray> data = new List<IArrowArray>();
             int rows = rnd.Next(Convert.ToInt32(0.99 * settings.BatchRows), settings.BatchRows + 1);
-            for (var c = 0; c < settings.Columns; c++)
-            {
-                int startIndex = rnd.Next(0, RandomData.Length - settings.BatchRows + 1);
-                Span<float> slice = new Span<float>(RandomData, startIndex, rows);
-
-                var cBuilder = new FloatArray.Builder();
-                foreach (var element in slice)
+            for (var c = 0; c < schema.FieldsList.Count; c++)
+            { 
+                var dataType = schema.FieldsList[c].DataType;
+                if (dataType is FloatType)
                 {
-                    cBuilder.Append(element);
-                }
+                    int startIndex = rnd.Next(0, RandomData.Length - settings.BatchRows + 1);
+                    Span<float> slice = new Span<float>(RandomData, startIndex, rows);
 
-                FloatArray floatArray = cBuilder.Build();
-                data.Add(floatArray);
+                    var cBuilder = new FloatArray.Builder();
+                    foreach (var element in slice)
+                    {
+                        cBuilder.Append(element);
+                    }
+
+                    data.Add(cBuilder.Build());
+                }
+                else if (dataType is StringType)
+                {
+                    int startIndex = rnd.Next(0, RandomData.Length - settings.BatchRows + 1);
+                    Span<float> slice = new Span<float>(RandomData, startIndex, rows);
+
+                    var cBuilder = new StringArray.Builder();
+                    foreach (var element in slice)
+                    {
+                        cBuilder.Append(element.ToString(CultureInfo.InvariantCulture));
+                    }
+
+                    data.Add(cBuilder.Build());
+                }
+                else if (dataType is HalfFloatType)
+                {
+                    int startIndex = rnd.Next(0, RandomData.Length - settings.BatchRows + 1);
+                    Span<float> slice = new Span<float>(RandomData, startIndex, rows);
+
+                    var cBuilder = new HalfFloatArray.Builder();
+                    foreach (var element in slice)
+                    {
+                        cBuilder.Append((Half)element);
+                    }
+
+                    data.Add(cBuilder.Build());
+                }
+                else
+                {
+                    throw new Exception($"Unsupported data type: {dataType}");
+                }
             }
 
             // --- Combine arrays into a RecordBatch ---
@@ -94,7 +128,7 @@ public class Tester : AsyncCommand<TesterSettings>
 
         // Define the schema for the RecordBatch
         var fields = Enumerable.Range(0, settings.Columns)
-            .Select(i => new Field($"C{i}", FloatType.Default, nullable: false))
+            .Select(i => new Field($"C{i}", COLUMN_TYPES[i % COLUMN_TYPES.Length], nullable: false))
             .ToList();
 
         var sw = Stopwatch.StartNew();
