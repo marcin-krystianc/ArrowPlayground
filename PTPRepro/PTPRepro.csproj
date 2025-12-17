@@ -7,7 +7,7 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Apache.Arrow" Version="21.0.0" />
+        <PackageReference Include="Apache.Arrow" Version="19.0.1" />
         <PackageReference Include="ParquetSharp" Version="21.0.0" />
         <PackageReference Include="Spectre.Console" Version="0.44.0" />
         <PackageReference Include="CommunityToolkit.HighPerformance" Version="7.0.3" />
