@@ -1,15 +1,12 @@
 // src/main.rs
 // > cargo build --release && ./target/release/benchmarks
 
-use std::{fs::File, path::Path};
+use std::{fs::File};
 
 use std::time::Instant;
-use std::thread::sleep;
-use std::time::Duration;
 
 // Import necessary types from arrow-schema and parquet crates
 use parquet::file::{
-    metadata::{ColumnChunkMetaData, FileMetaData, RowGroupMetaData},
     reader::{FileReader, SerializedFileReader},
 };
 
@@ -22,7 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Record the start time
     let start = Instant::now();
-    for i in 0..1000 {
+    for _i in 0..1000 {
         // 1. Open the Parquet file
         let file = File::open(file_path)?;
 
@@ -33,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // 3. Get the FileMetaData
         // This contains top-level information about the Parquet file.
-        let file_metadata = reader.metadata().file_metadata();
+        let _file_metadata = reader.metadata().file_metadata();
     }
 
     // Record the end time
