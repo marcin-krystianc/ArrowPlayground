@@ -1,4 +1,6 @@
 // src/main.rs
+// > cargo build --release && ./target/release/benchmarks
+
 use std::{fs::File, path::Path};
 
 use std::time::Instant;
@@ -20,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Record the start time
     let start = Instant::now();
-    for i in 0..320 {
+    for i in 0..1000 {
         // 1. Open the Parquet file
         let file = File::open(file_path)?;
 
