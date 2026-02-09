@@ -1,12 +1,12 @@
 # Use the specified base image
-FROM apache/arrow-dev:amd64-ubuntu-22.04-python-3
+FROM apache/arrow-dev:amd64-ubuntu-noble-package-apache-arrow
 # Set environment variables
 ENV PYARROW_WITH_PARQUET=1 \
     PYARROW_WITH_DATASET=1 \
     PYARROW_WITH_PARQUET_ENCRYPTION=1 \
-	PYARROW_BUILD_TYPE=Debug \
-	PYARROW_BUNDLE_CYTHON_CPP=1 \
-	PYARROW_BUNDLE_ARROW_CPP=1 
+    PYARROW_BUILD_TYPE=Debug \
+    PYARROW_BUNDLE_CYTHON_CPP=1 \
+    PYARROW_BUNDLE_ARROW_CPP=1 
 
 # Install necessary dependencies
 RUN apt-get update && \
@@ -15,20 +15,19 @@ RUN apt-get update && \
     ninja-build \
     cmake \
     git \
-	wget \
-	nano \
-	mc \
-	htop \
-	ninja-build \
-	net-tools \
-	gdb \
-	iputils-ping \
-	strace \
-	binutils \
-	linux-tools-generic \
-	valgrind \
-	# perf
-	xz-utils \
+    wget \
+    nano \
+    mc \
+    htop \
+    ninja-build \
+    net-tools \
+    gdb \
+    iputils-ping \
+    strace \
+    binutils \
+    linux-tools-generic \
+    valgrind \
+    xz-utils \
     flex \
     bison \
     libelf-dev \
@@ -39,39 +38,38 @@ RUN apt-get update && \
     libpfm4-dev \
     libnuma-dev \
     libtraceevent-dev \
-    # other-tools
     ninja-build \
     build-essential \
     net-tools \
     gdb \
     python3-dev \
     python3-dbg \
-	liburing-dev \
+    liburing-dev \
 #Clean apt cache
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& echo
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && echo
 
-WORKDIR /
-RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
-    tar -xf ./linux-6.4.16.tar.xz && \
-    cd linux-6.4.16/tools/perf/ && \
-    make -C . && make install
+# WORKDIR /
+# RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
+#    tar -xf ./linux-6.4.16.tar.xz && \
+#    cd linux-6.4.16/tools/perf/ && \
+#    make -C . && make install
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
 RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
-	git fetch --all && \
+    git fetch --all && \
 #    git checkout --recurse-submodules 587b3fcad5ae4524411714c80a1479ff9a435508
- git checkout --recurse-submodules apache-arrow-22.0.0
+ git checkout --recurse-submodules apache-arrow-23.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
 RUN mkdir build && cd build && \
     cmake .. \
-	-DARROW_PARQUET=ON \
+    -DARROW_PARQUET=ON \
     -DPARQUET_BUILD_EXECUTABLES=ON \
     -DPARQUET_REQUIRE_ENCRYPTION=ON \
     -DARROW_DATASET=ON \
@@ -110,7 +108,7 @@ RUN mkdir build && cd build && \
     -DARROW_PROTOBUF_USE_SHARED=ON \
     -DARROW_RE2_LINKAGE=static \
     -DARROW_RUNTIME_SIMD_LEVEL=MAX \
-    -DARROW_S3=ON \
+    -DARROW_S3=OFF \
     -DARROW_SIMD_LEVEL=DEFAULT \
     -DARROW_SNAPPY_USE_SHARED=ON \
     -DARROW_SUBSTRAIT=ON \
@@ -128,7 +126,7 @@ RUN mkdir build && cd build && \
     -DARROW_WITH_ZLIB=ON \
     -DARROW_WITH_ZSTD=ON \
     -DARROW_ZSTD_USE_SHARED=ON \
-	-DARROW_WITH_OPENTELEMETRY=ON \
+    -DARROW_WITH_OPENTELEMETRY=ON \
     -GNinja && \
     ninja install
 
@@ -137,19 +135,19 @@ RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
 
 # Build Arrow Python
 WORKDIR /src/arrow/python
-RUN pip3 install cython && \
-    pip3 install --upgrade pip && \
-    pip3 install jupyterlab polars parquet-tools build && \
-    pip3 install . -v
+RUN pip3 install cython  --break-system-packages && \
+    # pip3 install --upgrade pip --break-system-packages  && \
+    pip3 install numpy build --break-system-packages && \
+    pip3 install . -v  --break-system-packages 
 
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-RUN pip3 install jupyterlab polars parquet-tools build
+# ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+# RUN pip3 install jupyterlab polars parquet-tools build
 
-WORKDIR /src
-RUN git clone https://github.com/adamreeve/parquet-inspect.git && \
-    cd parquet-inspect && \
-	python3 -m build  && \
-	pip install --editable .
+# WORKDIR /src
+# RUN git clone https://github.com/adamreeve/parquet-inspect.git && \
+#    cd parquet-inspect && \
+#   python3 -m build  && \
+#   pip install --editable .
 
 WORKDIR /src/arrow/cpp/build
 ENV ARROW_TEST_DATA=/src/arrow/testing/data

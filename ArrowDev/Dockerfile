@@ -1,9 +1,12 @@
 # Use the specified base image
-FROM apache/arrow-dev:amd64-ubuntu-22.04-python-3
+FROM apache/arrow-dev:amd64-ubuntu-noble-package-apache-arrow
 # Set environment variables
 ENV PYARROW_WITH_PARQUET=1 \
     PYARROW_WITH_DATASET=1 \
-    PYARROW_WITH_PARQUET_ENCRYPTION=1
+    PYARROW_WITH_PARQUET_ENCRYPTION=1 \
+    PYARROW_BUILD_TYPE=Release \
+    PYARROW_BUNDLE_CYTHON_CPP=1 \
+    PYARROW_BUNDLE_ARROW_CPP=1 
 
 # Install necessary dependencies
 RUN apt-get update && \
@@ -48,7 +51,7 @@ WORKDIR /
 RUN wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.4.16.tar.xz && \
     tar -xf ./linux-6.4.16.tar.xz && \
     cd linux-6.4.16/tools/perf/ && \
-    make -C . && make install
+    make WERROR=0
 
 # Clone the specified Arrow repository and checkout the desired branch
 WORKDIR /src
@@ -56,7 +59,7 @@ RUN git clone --recursive https://github.com/apache/arrow.git && \
     cd arrow && \
     git remote add marcin-krystianc https://github.com/marcin-krystianc/arrow.git && \
 	git fetch --all && \
-	git checkout --recurse-submodules apache-arrow-22.0.0
+	git checkout --recurse-submodules apache-arrow-23.0.0
 
 # Build Arrow C++
 WORKDIR /src/arrow/cpp
@@ -101,7 +104,7 @@ RUN mkdir build && cd build && \
     -DARROW_PROTOBUF_USE_SHARED=ON \
     -DARROW_RE2_LINKAGE=static \
     -DARROW_RUNTIME_SIMD_LEVEL=MAX \
-    -DARROW_S3=ON \
+    -DARROW_S3=OFF \
     -DARROW_SIMD_LEVEL=DEFAULT \
     -DARROW_SNAPPY_USE_SHARED=ON \
     -DARROW_SUBSTRAIT=ON \
@@ -130,12 +133,12 @@ RUN find /usr/local/lib/ -depth -name pyarrow -type d -print -exec rm -r {} \;
 
 # Build Arrow Python
 WORKDIR /src/arrow/python
-RUN pip3 install cython && \
-	pip3 install --upgrade pip && \
-    pip3 install jupyterlab polars parquet-tools build && \
-    python3 setup.py build_ext --inplace --with-parquet-encryption --with-dataset --with-parquet && \
-    python3 setup.py install
+RUN pip3 install cython  --break-system-packages && \
+    # pip3 install --upgrade pip --break-system-packages  && \
+    pip3 install numpy build --break-system-packages && \
+    pip3 install . -v  --break-system-packages 
 
+# pip3 install jupyterlab polars parquet-tools build && \
 # Cleanup Arrow Python build artifacts
 RUN rm -rf /src/arrow/python/build
 
@@ -144,13 +147,13 @@ RUN rm -rf /src/arrow/python/build
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+# ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
 
 WORKDIR /src
 RUN git clone https://github.com/adamreeve/parquet-inspect.git && \
     cd parquet-inspect && \
 	python3 -m build  && \
-	pip3 install --editable .
+	pip3 install --editable . --break-system-packages
 
 WORKDIR /src/arrow/cpp/build
 ENV ARROW_TEST_DATA=/src/arrow/testing/data
